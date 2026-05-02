@@ -239,6 +239,12 @@ nav.scrolled {
 .wt-btn { background: var(--surface3); border: 1px solid var(--border2); color: var(--fg2); padding: .28rem .75rem; border-radius: 5px; font-size: .76rem; }
 .wt-path { flex: 1; min-width: 160px; background: var(--surface3); border: 1px solid var(--border2); color: var(--fg3); padding: .28rem .65rem; border-radius: 5px; font-size: .76rem; }
 .wt-sel { background: var(--surface3); border: 1px solid var(--border2); color: var(--fg2); padding: .28rem .55rem; border-radius: 5px; font-size: .76rem; width: 140px; }
+.wt-sel-wrap { position: relative; }
+.wt-sel-dd { position: absolute; top: calc(100% + 4px); left: 0; min-width: 158px; z-index: 200; background: #1a1a2c; border: 1px solid var(--border2); border-radius: 7px; box-shadow: 0 12px 40px rgba(0,0,0,.7); padding: .3rem 0; display: none; }
+.wt-sel-dd.open { display: block; animation: fadeIn .12s ease; }
+.wt-sel-dd-item { padding: .35rem .9rem; font-size: .78rem; color: var(--fg2); cursor: pointer; transition: background .1s; white-space: nowrap; }
+.wt-sel-dd-item:hover { background: rgba(91,141,238,.12); color: var(--fg); }
+.wt-sel-dd-item.active { color: var(--accent); }
 .wt-batch { background: var(--accent); border: none; color: #fff; padding: .28rem .75rem; border-radius: 5px; font-size: .76rem; }
 
 .win-status {
@@ -810,8 +816,14 @@ nav.scrolled {
         <div class="win-toolbar">
           <div class="wt-btn" onclick="mockBrowse()">Browse</div>
           <div class="wt-path" id="mk-path">/music/Avenged Sevenfold</div>
-          <div class="wt-sel" id="mk-artist-sel">Avenged Sevenfold ▾</div>
-          <div class="wt-sel" id="mk-album-sel">Hail to the King ▾</div>
+          <div class="wt-sel-wrap">
+            <div class="wt-sel" id="mk-artist-sel" onclick="mockArtistDropdown(event)">Avenged Sevenfold ▾</div>
+            <div class="wt-sel-dd" id="mk-artist-dd"></div>
+          </div>
+          <div class="wt-sel-wrap">
+            <div class="wt-sel" id="mk-album-sel" onclick="mockAlbumDropdown(event)">Hail to the King ▾</div>
+            <div class="wt-sel-dd" id="mk-album-dd"></div>
+          </div>
           <div class="wt-batch" onclick="mockBatch()">Batch</div>
         </div>
 
@@ -826,15 +838,7 @@ nav.scrolled {
 
           <div class="wsb">
             <div class="wsb-hdr">Spotify Releases <span class="wsb-badge">34</span></div>
-            <div class="wsb-list" id="mk-sidebar">
-              <div class="rel-row" data-id="stt" onclick="mockSelect('stt',this)"><div class="rel-thumb" style="background:linear-gradient(135deg,#1a0a2e,#3a1060)">♪</div><div class="rel-info"><div class="rel-title">Sounding the Seventh Trumpet</div><div class="rel-meta">2001 · Album</div></div><div class="rel-n">13</div></div>
-              <div class="rel-row" data-id="wtf" onclick="mockSelect('wtf',this)"><div class="rel-thumb" style="background:linear-gradient(135deg,#0a1a2e,#102a60)">♪</div><div class="rel-info"><div class="rel-title">Waking the Fallen</div><div class="rel-meta">2003 · Album</div></div><div class="rel-n">12</div></div>
-              <div class="rel-row" data-id="coe" onclick="mockSelect('coe',this)"><div class="rel-thumb" style="background:linear-gradient(135deg,#2e0a0a,#601010)">♪</div><div class="rel-info"><div class="rel-title">City of Evil</div><div class="rel-meta">2005 · Album</div></div><div class="rel-n">11</div></div>
-              <div class="rel-row" data-id="nm"  onclick="mockSelect('nm',this)"><div class="rel-thumb" style="background:linear-gradient(135deg,#0a2e0a,#106010)">♪</div><div class="rel-info"><div class="rel-title">Nightmare</div><div class="rel-meta">2010 · Album</div></div><div class="rel-n">11</div></div>
-              <div class="rel-row sel" data-id="httk" onclick="mockSelect('httk',this)"><div class="rel-thumb" style="background:linear-gradient(135deg,#1e1e06,#3a3a00)">♫</div><div class="rel-info"><div class="rel-title">Hail to the King</div><div class="rel-meta">2013 · Album</div></div><div class="rel-n">11</div></div>
-              <div class="rel-row" data-id="ts"   onclick="mockSelect('ts',this)"><div class="rel-thumb" style="background:linear-gradient(135deg,#1a0a1a,#3a003a)">♪</div><div class="rel-info"><div class="rel-title">The Stage</div><div class="rel-meta">2016 · Album</div></div><div class="rel-n">11</div></div>
-              <div class="rel-row" data-id="libad" onclick="mockSelect('libad',this)"><div class="rel-thumb" style="background:linear-gradient(135deg,#0a1a1a,#003a3a)">♪</div><div class="rel-info"><div class="rel-title">Life Is But a Dream...</div><div class="rel-meta">2023 · Album</div></div><div class="rel-n">10</div></div>
-            </div>
+            <div class="wsb-list" id="mk-sidebar"></div>
           </div>
 
           <div class="wc">
@@ -1508,12 +1512,326 @@ const RELEASES = {
       {n:5, old:'05 Cosmic.flac',             nw:'05 - Cosmic.flac',             s:'s-hi', p:'100%'},
       {n:6, old:'Beautiful Morning.flac',     nw:'06 - Beautiful Morning.flac',  s:'s-hi', p:'92%'},
     ]
+  },
+  // ── Metallica ─────────────────────────────────────────────────────────────────
+  mop: {
+    title: 'Master of Puppets', year: '1986', genre: 'Thrash Metal',
+    grad: 'linear-gradient(135deg,#1a0e00 0%,#3a2800 60%,#0f0800 100%)',
+    tracks: [
+      {n:1, old:'01 Battery.flac',                    nw:'01 - Battery.flac',                    s:'s-hi', p:'100%'},
+      {n:2, old:'02 Master of Puppets.flac',          nw:'02 - Master of Puppets.flac',          s:'s-hi', p:'100%'},
+      {n:3, old:'03 The Thing That Should Not Be.flac',nw:'03 - The Thing That Should Not Be.flac',s:'s-hi',p:'100%'},
+      {n:4, old:'Welcome Home.flac',                  nw:'04 - Welcome Home (Sanitarium).flac',  s:'s-md', p:'88%'},
+      {n:5, old:'05 Disposable Heroes.flac',          nw:'05 - Disposable Heroes.flac',          s:'s-hi', p:'100%'},
+      {n:6, old:'track06.flac',                       nw:'06 - Leper Messiah.flac',              s:'s-md', p:'73%'},
+    ]
+  },
+  ajfa: {
+    title: '...And Justice for All', year: '1988', genre: 'Thrash Metal',
+    grad: 'linear-gradient(135deg,#1a1400 0%,#302800 60%,#0f0e00 100%)',
+    tracks: [
+      {n:1, old:'01 Blackened.flac',               nw:'01 - Blackened.flac',               s:'s-hi', p:'100%'},
+      {n:2, old:'02 ...And Justice for All.flac',  nw:'02 - ...And Justice for All.flac',  s:'s-hi', p:'100%'},
+      {n:3, old:'03 Eye of the Beholder.flac',     nw:'03 - Eye of the Beholder.flac',     s:'s-hi', p:'100%'},
+      {n:4, old:'One.flac',                        nw:'04 - One.flac',                     s:'s-md', p:'91%'},
+      {n:5, old:'track05.flac',                    nw:'05 - The Shortest Straw.flac',      s:'s-md', p:'79%'},
+      {n:6, old:'06 Harvester of Sorrow.flac',     nw:'06 - Harvester of Sorrow.flac',     s:'s-hi', p:'100%'},
+    ]
+  },
+  met: {
+    title: 'Metallica', year: '1991', genre: 'Heavy Metal',
+    grad: 'linear-gradient(135deg,#0e0e0e 0%,#202020 60%,#080808 100%)',
+    tracks: [
+      {n:1, old:'01 Enter Sandman.flac',        nw:'01 - Enter Sandman.flac',        s:'s-hi', p:'100%'},
+      {n:2, old:'02 Sad But True.flac',         nw:'02 - Sad But True.flac',         s:'s-hi', p:'100%'},
+      {n:3, old:'03 Holier Than Thou.flac',     nw:'03 - Holier Than Thou.flac',     s:'s-hi', p:'100%'},
+      {n:4, old:'The Unforgiven.flac',          nw:'04 - The Unforgiven.flac',       s:'s-md', p:'94%'},
+      {n:5, old:'05 Wherever I May Roam.flac',  nw:'05 - Wherever I May Roam.flac',  s:'s-hi', p:'100%'},
+      {n:6, old:'track06.flac',                 nw:'06 - Don\'t Tread on Me.flac',   s:'s-md', p:'81%'},
+    ]
+  },
+  // ── Iron Maiden ───────────────────────────────────────────────────────────────
+  notb: {
+    title: 'The Number of the Beast', year: '1982', genre: 'Heavy Metal',
+    grad: 'linear-gradient(135deg,#2e0000 0%,#5a0000 60%,#1a0000 100%)',
+    tracks: [
+      {n:1, old:'01 Invaders.flac',                  nw:'01 - Invaders.flac',                  s:'s-hi', p:'100%'},
+      {n:2, old:'02 Children of the Damned.flac',    nw:'02 - Children of the Damned.flac',    s:'s-hi', p:'100%'},
+      {n:3, old:'03 The Prisoner.flac',              nw:'03 - The Prisoner.flac',              s:'s-hi', p:'100%'},
+      {n:4, old:'22 Acacia Avenue.flac',             nw:'04 - 22 Acacia Avenue.flac',          s:'s-md', p:'87%'},
+      {n:5, old:'track05.flac',                      nw:'05 - The Number of the Beast.flac',   s:'s-md', p:'77%'},
+      {n:6, old:'06 Run to the Hills.flac',          nw:'06 - Run to the Hills.flac',          s:'s-hi', p:'100%'},
+    ]
+  },
+  ps: {
+    title: 'Powerslave', year: '1984', genre: 'Heavy Metal',
+    grad: 'linear-gradient(135deg,#1a0e00 0%,#3a2000 60%,#0f0800 100%)',
+    tracks: [
+      {n:1, old:'01 Aces High.flac',              nw:'01 - Aces High.flac',              s:'s-hi', p:'100%'},
+      {n:2, old:'02 2 Minutes to Midnight.flac',  nw:'02 - 2 Minutes to Midnight.flac',  s:'s-hi', p:'100%'},
+      {n:3, old:'Losfer Words.flac',              nw:'03 - Losfer Words (Big \'Orra).flac',s:'s-md',p:'91%'},
+      {n:4, old:'04 Flash of the Blade.flac',     nw:'04 - Flash of the Blade.flac',     s:'s-hi', p:'100%'},
+      {n:5, old:'track05.flac',                   nw:'05 - The Duelists.flac',           s:'s-md', p:'83%'},
+      {n:6, old:'06 Powerslave.flac',             nw:'06 - Powerslave.flac',             s:'s-hi', p:'100%'},
+    ]
+  },
+  bnw: {
+    title: 'Brave New World', year: '2000', genre: 'Heavy Metal',
+    grad: 'linear-gradient(135deg,#00101a 0%,#002030 60%,#000a10 100%)',
+    tracks: [
+      {n:1, old:'01 The Wicker Man.flac',          nw:'01 - The Wicker Man.flac',          s:'s-hi', p:'100%'},
+      {n:2, old:'02 Ghost of the Navigator.flac',  nw:'02 - Ghost of the Navigator.flac',  s:'s-hi', p:'100%'},
+      {n:3, old:'03 Brave New World.flac',         nw:'03 - Brave New World.flac',         s:'s-hi', p:'100%'},
+      {n:4, old:'Blood Brothers.flac',             nw:'04 - Blood Brothers.flac',          s:'s-md', p:'89%'},
+      {n:5, old:'track05.flac',                    nw:'05 - The Mercenary.flac',           s:'s-md', p:'76%'},
+      {n:6, old:'06 Dream of Mirrors.flac',        nw:'06 - Dream of Mirrors.flac',        s:'s-hi', p:'100%'},
+    ]
+  },
+  // ── Metallica (sidebar extras) ────────────────────────────────────────────────
+  kea: {
+    title: "Kill 'Em All", year: '1983', genre: 'Thrash Metal',
+    grad: 'linear-gradient(135deg,#2e1600 0%,#5a2c00 60%,#1a0d00 100%)',
+    tracks: [
+      {n:1, old:'01 Hit the Lights.flac',           nw:'01 - Hit the Lights.flac',           s:'s-hi', p:'100%'},
+      {n:2, old:'02 The Four Horsemen.flac',        nw:'02 - The Four Horsemen.flac',        s:'s-hi', p:'100%'},
+      {n:3, old:'03 Motorbreath.flac',              nw:'03 - Motorbreath.flac',              s:'s-hi', p:'100%'},
+      {n:4, old:'Jump in the Fire.flac',            nw:'04 - Jump in the Fire.flac',         s:'s-md', p:'89%'},
+      {n:5, old:'track05.flac',                     nw:'05 - (Anesthesia) - Pulling Teeth.flac',s:'s-md', p:'78%'},
+    ]
+  },
+  rtl: {
+    title: 'Ride the Lightning', year: '1984', genre: 'Thrash Metal',
+    grad: 'linear-gradient(135deg,#001630 0%,#002a60 60%,#000c1a 100%)',
+    tracks: [
+      {n:1, old:'01 Fight Fire with Fire.flac',  nw:'01 - Fight Fire with Fire.flac',  s:'s-hi', p:'100%'},
+      {n:2, old:'02 Ride the Lightning.flac',    nw:'02 - Ride the Lightning.flac',    s:'s-hi', p:'100%'},
+      {n:3, old:'03 For Whom the Bell Tolls.flac',nw:'03 - For Whom the Bell Tolls.flac',s:'s-hi',p:'100%'},
+      {n:4, old:'Fade to Black.flac',            nw:'04 - Fade to Black.flac',         s:'s-md', p:'95%'},
+      {n:5, old:'track05.flac',                  nw:'05 - Trapped Under Ice.flac',     s:'s-md', p:'77%'},
+    ]
+  },
+  dm: {
+    title: 'Death Magnetic', year: '2008', genre: 'Thrash Metal',
+    grad: 'linear-gradient(135deg,#180018 0%,#2c002c 60%,#0c000c 100%)',
+    tracks: [
+      {n:1, old:'01 That Was Just Your Life.flac',  nw:'01 - That Was Just Your Life.flac',  s:'s-hi', p:'100%'},
+      {n:2, old:'02 The End of the Line.flac',      nw:'02 - The End of the Line.flac',      s:'s-hi', p:'100%'},
+      {n:3, old:'track03.flac',                     nw:'03 - Broken, Beat & Scarred.flac',   s:'s-md', p:'71%'},
+      {n:4, old:'Day That Never Comes.flac',        nw:'04 - The Day That Never Comes.flac', s:'s-md', p:'88%'},
+      {n:5, old:'05 All Nightmare Long.flac',       nw:'05 - All Nightmare Long.flac',       s:'s-hi', p:'100%'},
+    ]
+  },
+  // ── Iron Maiden (sidebar extras) ──────────────────────────────────────────────
+  im80: {
+    title: 'Iron Maiden', year: '1980', genre: 'Heavy Metal',
+    grad: 'linear-gradient(135deg,#2e0a00 0%,#4e1200 60%,#180500 100%)',
+    tracks: [
+      {n:1, old:'01 Prowler.flac',               nw:'01 - Prowler.flac',               s:'s-hi', p:'100%'},
+      {n:2, old:'02 Remember Tomorrow.flac',     nw:'02 - Remember Tomorrow.flac',     s:'s-hi', p:'100%'},
+      {n:3, old:'Running Free.flac',             nw:'03 - Running Free.flac',           s:'s-md', p:'91%'},
+      {n:4, old:'track04.flac',                  nw:'04 - Phantom of the Opera.flac',  s:'s-md', p:'80%'},
+      {n:5, old:'05 Iron Maiden.flac',           nw:'05 - Iron Maiden.flac',           s:'s-hi', p:'100%'},
+    ]
+  },
+  pom: {
+    title: 'Piece of Mind', year: '1983', genre: 'Heavy Metal',
+    grad: 'linear-gradient(135deg,#1a1600 0%,#343000 60%,#0c0a00 100%)',
+    tracks: [
+      {n:1, old:'01 Where Eagles Dare.flac',    nw:'01 - Where Eagles Dare.flac',    s:'s-hi', p:'100%'},
+      {n:2, old:'02 Revelations.flac',          nw:'02 - Revelations.flac',          s:'s-hi', p:'100%'},
+      {n:3, old:'03 Flight of Icarus.flac',     nw:'03 - Flight of Icarus.flac',     s:'s-hi', p:'100%'},
+      {n:4, old:'The Trooper.flac',             nw:'04 - The Trooper.flac',          s:'s-md', p:'93%'},
+      {n:5, old:'track05.flac',                 nw:'05 - Still Life.flac',           s:'s-md', p:'79%'},
+    ]
+  },
+  sit: {
+    title: 'Somewhere in Time', year: '1986', genre: 'Heavy Metal',
+    grad: 'linear-gradient(135deg,#001630 0%,#002a5a 60%,#000c18 100%)',
+    tracks: [
+      {n:1, old:'01 Caught Somewhere in Time.flac',nw:'01 - Caught Somewhere in Time.flac',s:'s-hi', p:'100%'},
+      {n:2, old:'02 Wasted Years.flac',          nw:'02 - Wasted Years.flac',          s:'s-hi', p:'100%'},
+      {n:3, old:'03 Sea of Madness.flac',        nw:'03 - Sea of Madness.flac',        s:'s-hi', p:'100%'},
+      {n:4, old:'Heaven Can Wait.flac',          nw:'04 - Heaven Can Wait.flac',       s:'s-md', p:'87%'},
+      {n:5, old:'track05.flac',                  nw:'05 - Deja-Vu.flac',               s:'s-md', p:'74%'},
+    ]
+  },
+  // ── Tool (sidebar extras) ─────────────────────────────────────────────────────
+  ut: {
+    title: 'Undertow', year: '1993', genre: 'Progressive Metal',
+    grad: 'linear-gradient(135deg,#0a1400 0%,#182800 60%,#050c00 100%)',
+    tracks: [
+      {n:1, old:'01 Intolerance.flac',  nw:'01 - Intolerance.flac',  s:'s-hi', p:'100%'},
+      {n:2, old:'02 Prison Sex.flac',   nw:'02 - Prison Sex.flac',   s:'s-hi', p:'100%'},
+      {n:3, old:'03 Sober.flac',        nw:'03 - Sober.flac',        s:'s-hi', p:'100%'},
+      {n:4, old:'Bottom.flac',          nw:'04 - Bottom.flac',       s:'s-md', p:'92%'},
+      {n:5, old:'track05.flac',         nw:'05 - Crawl Away.flac',   s:'s-md', p:'81%'},
+    ]
+  },
+  t10k: {
+    title: '10,000 Days', year: '2006', genre: 'Progressive Metal',
+    grad: 'linear-gradient(135deg,#141000 0%,#282000 60%,#0a0800 100%)',
+    tracks: [
+      {n:1, old:'01 Vicarious.flac',              nw:'01 - Vicarious.flac',              s:'s-hi', p:'100%'},
+      {n:2, old:'02 Jambi.flac',                  nw:'02 - Jambi.flac',                  s:'s-hi', p:'100%'},
+      {n:3, old:'Wings for Marie.flac',           nw:'03 - Wings for Marie (Pt 1).flac', s:'s-md', p:'86%'},
+      {n:4, old:'track04.flac',                   nw:'04 - 10,000 Days (Wings Pt 2).flac',s:'s-md',p:'79%'},
+      {n:5, old:'05 The Pot.flac',                nw:'05 - The Pot.flac',                s:'s-hi', p:'100%'},
+    ]
+  },
+  // ── Tool ──────────────────────────────────────────────────────────────────────
+  aen: {
+    title: 'Aenima', year: '1996', genre: 'Progressive Metal',
+    grad: 'linear-gradient(135deg,#0a1a00 0%,#183000 60%,#051000 100%)',
+    tracks: [
+      {n:1, old:'01 Stinkfist.flac',      nw:'01 - Stinkfist.flac',      s:'s-hi', p:'100%'},
+      {n:2, old:'02 Eulogy.flac',         nw:'02 - Eulogy.flac',         s:'s-hi', p:'100%'},
+      {n:3, old:'03 H..flac',             nw:'03 - H..flac',             s:'s-hi', p:'100%'},
+      {n:4, old:'Forty Six & 2.flac',     nw:'04 - Forty Six & 2.flac',  s:'s-md', p:'96%'},
+      {n:5, old:'track05.flac',           nw:'05 - Jimmy.flac',          s:'s-md', p:'74%'},
+      {n:6, old:'Aenema.flac',            nw:'06 - Aenima.flac',         s:'s-md', p:'92%'},
+    ]
+  },
+  lat: {
+    title: 'Lateralus', year: '2001', genre: 'Progressive Metal',
+    grad: 'linear-gradient(135deg,#001a1a 0%,#003030 60%,#000f0f 100%)',
+    tracks: [
+      {n:1, old:'01 The Grudge.flac',           nw:'01 - The Grudge.flac',           s:'s-hi', p:'100%'},
+      {n:2, old:'02 Eon Blue Apocalypse.flac',  nw:'02 - Eon Blue Apocalypse.flac',  s:'s-hi', p:'100%'},
+      {n:3, old:'03 The Patient.flac',          nw:'03 - The Patient.flac',          s:'s-hi', p:'100%'},
+      {n:4, old:'Schism.flac',                  nw:'04 - Schism.flac',               s:'s-md', p:'93%'},
+      {n:5, old:'track05.flac',                 nw:'05 - Parabol.flac',              s:'s-md', p:'85%'},
+      {n:6, old:'06 Lateralus.flac',            nw:'06 - Lateralus.flac',            s:'s-hi', p:'100%'},
+    ]
+  },
+  fi: {
+    title: 'Fear Inoculum', year: '2019', genre: 'Progressive Metal',
+    grad: 'linear-gradient(135deg,#001800 0%,#003000 60%,#000e00 100%)',
+    tracks: [
+      {n:1, old:'01 Fear Inoculum.flac',              nw:'01 - Fear Inoculum.flac',              s:'s-hi', p:'100%'},
+      {n:2, old:'02 Pneuma.flac',                     nw:'02 - Pneuma.flac',                     s:'s-hi', p:'100%'},
+      {n:3, old:'Litanie contre la Peur.flac',        nw:'03 - Litanie contre la Peur.flac',     s:'s-md', p:'90%'},
+      {n:4, old:'04 Invincible.flac',                 nw:'04 - Invincible.flac',                 s:'s-hi', p:'100%'},
+      {n:5, old:'track05.flac',                       nw:'05 - Legion Inoculant.flac',           s:'s-md', p:'82%'},
+      {n:6, old:'06 Descending.flac',                 nw:'06 - Descending.flac',                 s:'s-hi', p:'100%'},
+    ]
   }
 };
 
+const ARTIST_DATA = {
+  'Avenged Sevenfold': {
+    path: '/music/Avenged Sevenfold',
+    albums:  ['nm','httk','ts'],
+    sidebar: ['stt','wtf','coe','nm','httk','ts','libad'],
+    count: 34,
+  },
+  'Metallica': {
+    path: '/music/Metallica',
+    albums:  ['mop','ajfa','met'],
+    sidebar: ['kea','rtl','mop','ajfa','met','dm'],
+    count: 22,
+  },
+  'Iron Maiden': {
+    path: '/music/Iron Maiden',
+    albums:  ['notb','ps','bnw'],
+    sidebar: ['im80','notb','pom','ps','sit','bnw'],
+    count: 28,
+  },
+  'Tool': {
+    path: '/music/Tool',
+    albums:  ['aen','lat','fi'],
+    sidebar: ['ut','aen','lat','t10k','fi'],
+    count: 9,
+  },
+};
+const SIDEBAR_ICONS = {
+  stt:'♪', wtf:'♪', coe:'♪', nm:'♪', httk:'♫', ts:'♪', libad:'♪',
+  kea:'♪', rtl:'♪', mop:'♫', ajfa:'♪', met:'♪', dm:'♪',
+  im80:'♪', notb:'♫', pom:'♪', ps:'♪', sit:'♪', bnw:'♪',
+  ut:'♪', aen:'♪', lat:'♫', t10k:'♪', fi:'♪',
+};
+
+let currentArtist = 'Avenged Sevenfold';
 let currentRelease = 'httk';
 let executed = false;
 let currentMockTab = 'preview';
+
+function renderSidebar(artist) {
+  const data = ARTIST_DATA[artist];
+  document.querySelector('.wsb-badge').textContent = data.count;
+  const list = document.getElementById('mk-sidebar');
+  list.innerHTML = data.sidebar.map(id => {
+    const r = RELEASES[id];
+    return `<div class="rel-row${id === currentRelease ? ' sel' : ''}" data-id="${id}" onclick="mockSelect('${id}',this)">
+      <div class="rel-thumb" style="background:${r.grad}">${SIDEBAR_ICONS[id]||'♪'}</div>
+      <div class="rel-info"><div class="rel-title">${r.title}</div><div class="rel-meta">${r.year} · Album</div></div>
+      <div class="rel-n">${r.tracks.length}</div>
+    </div>`;
+  }).join('');
+}
+
+function closeAllSelDropdowns() {
+  document.getElementById('mk-artist-dd').classList.remove('open');
+  document.getElementById('mk-album-dd').classList.remove('open');
+}
+
+function mockArtistDropdown(e) {
+  e.stopPropagation();
+  const dd = document.getElementById('mk-artist-dd');
+  const wasOpen = dd.classList.contains('open');
+  closeAllSelDropdowns();
+  if (wasOpen) return;
+  const artists = Object.keys(ARTIST_DATA);
+  dd.innerHTML = artists.map(a =>
+    `<div class="wt-sel-dd-item${a === currentArtist ? ' active' : ''}" onclick="selectArtist('${a}')">${a}</div>`
+  ).join('');
+  dd.classList.add('open');
+}
+
+function selectArtist(artist) {
+  closeAllSelDropdowns();
+  if (artist === currentArtist) return;
+  currentArtist = artist;
+  const data = ARTIST_DATA[artist];
+  document.getElementById('mk-artist-sel').textContent = artist + ' ▾';
+  const pathEl = document.getElementById('mk-path');
+  pathEl.style.opacity = '0';
+  setTimeout(() => { pathEl.textContent = data.path; pathEl.style.opacity = '1'; }, 150);
+  document.getElementById('mk-meta-artist').textContent = artist;
+  renderSidebar(artist);
+  // Default selection: first album-dropdown item (highlighted in sidebar too)
+  const firstId = data.albums[0];
+  currentRelease = firstId;
+  const firstRow = document.querySelector(`#mk-sidebar .rel-row[data-id="${firstId}"]`);
+  if (firstRow) {
+    document.querySelectorAll('#mk-sidebar .rel-row').forEach(r => r.classList.remove('sel'));
+    firstRow.classList.add('sel');
+  }
+  mockSelect(firstId, firstRow || document.createElement('div'));
+  document.getElementById('mk-album-sel').textContent = RELEASES[firstId].title + ' ▾';
+}
+
+function mockAlbumDropdown(e) {
+  e.stopPropagation();
+  const dd = document.getElementById('mk-album-dd');
+  const wasOpen = dd.classList.contains('open');
+  closeAllSelDropdowns();
+  if (wasOpen) return;
+  const albums = ARTIST_DATA[currentArtist].albums;
+  dd.innerHTML = albums.map(id => {
+    const r = RELEASES[id];
+    return `<div class="wt-sel-dd-item${id === currentRelease ? ' active' : ''}" onclick="selectAlbumDD('${id}')">${r.title}</div>`;
+  }).join('');
+  dd.classList.add('open');
+}
+
+function selectAlbumDD(id) {
+  closeAllSelDropdowns();
+  document.getElementById('mk-album-sel').textContent = RELEASES[id].title + ' ▾';
+  const row = document.querySelector(`#mk-sidebar .rel-row[data-id="${id}"]`);
+  if (row) mockSelect(id, row);
+}
+
+document.addEventListener('click', closeAllSelDropdowns);
 
 function renderTracks(id, done) {
   const rel = RELEASES[id];
@@ -1543,10 +1861,10 @@ function renderLog(id) {
   const now = new Date();
   const ts = t => { const d = new Date(now - t); return d.toTimeString().slice(0,8); };
   const lines = [
-    `<div style="color:var(--accent)">[${ts(5000)}] Searching Spotify: "Avenged Sevenfold"</div>`,
-    `<div style="color:var(--green)">[${ts(4200)}] Artist matched: Avenged Sevenfold (score 100)</div>`,
+    `<div style="color:var(--accent)">[${ts(5000)}] Searching Spotify: "${currentArtist}"</div>`,
+    `<div style="color:var(--green)">[${ts(4200)}] Artist matched: ${currentArtist} (score 100)</div>`,
     `<div style="color:var(--accent)">[${ts(3800)}] Fetching releases…</div>`,
-    `<div>[${ts(3100)}] Found 34 releases</div>`,
+    `<div>[${ts(3100)}] Found ${ARTIST_DATA[currentArtist].count} releases</div>`,
     `<div style="color:var(--accent)">[${ts(2600)}] Loading "${rel.title}" tracks…</div>`,
     `<div style="color:var(--green)">[${ts(2000)}] Got ${rel.tracks.length} tracks from Spotify API</div>`,
     `<div style="color:var(--accent)">[${ts(1400)}] Fetching cover art…</div>`,
@@ -1589,9 +1907,11 @@ function mockSelect(id, el) {
   }, 250);
 
   // Metadata
+  document.getElementById('mk-meta-artist').textContent = currentArtist;
   document.getElementById('mk-meta-album').textContent  = rel.title;
   document.getElementById('mk-meta-year').textContent   = rel.year;
   document.getElementById('mk-meta-genre').textContent  = rel.genre;
+  document.getElementById('mk-album-sel').textContent   = rel.title + ' ▾';
 
   // Preview header
   const hi = rel.tracks.filter(t => t.s === 's-hi').length;
@@ -1698,29 +2018,15 @@ function closeMockFile() {
 }
 
 // ── Browse simulation ─────────────────────────────────────────────────────────
-const BROWSE_PATHS = [
-  ['/music/Avenged Sevenfold', 'Avenged Sevenfold'],
-  ['/music/Metallica', 'Metallica'],
-  ['/music/Iron Maiden', 'Iron Maiden'],
-  ['/music/Tool', 'Tool'],
-];
+const BROWSE_ARTIST_ORDER = Object.keys(ARTIST_DATA);
 let browseIdx = 0;
 function mockBrowse() {
-  browseIdx = (browseIdx + 1) % BROWSE_PATHS.length;
-  const [path, artist] = BROWSE_PATHS[browseIdx];
-  const pathEl = document.getElementById('mk-path');
-  const artEl  = document.getElementById('mk-artist-sel');
-  pathEl.style.transition = 'opacity .15s';
-  pathEl.style.opacity = '0';
-  setTimeout(() => {
-    pathEl.textContent = path;
-    artEl.textContent  = artist + ' ▾';
-    pathEl.style.opacity = '1';
-  }, 150);
+  const artists = BROWSE_ARTIST_ORDER;
+  browseIdx = (artists.indexOf(currentArtist) + 1) % artists.length;
+  selectArtist(artists[browseIdx]);
 }
 
 // ── Batch simulation ──────────────────────────────────────────────────────────
-const BATCH_ORDER = ['stt','wtf','coe','nm','httk','ts','libad'];
 let batchRunning = false;
 function mockBatch() {
   if (batchRunning) return;
@@ -1729,9 +2035,10 @@ function mockBatch() {
   const btn = document.querySelector('.wt-batch');
   btn.textContent = 'Batching…';
   btn.style.background = 'var(--amber)';
+  const batchOrder = ARTIST_DATA[currentArtist].albums;
   let i = 0;
   const step = () => {
-    if (i >= BATCH_ORDER.length) {
+    if (i >= batchOrder.length) {
       btn.textContent = '✓ Batch done';
       btn.style.background = 'var(--green)';
       setTimeout(() => {
@@ -1741,7 +2048,7 @@ function mockBatch() {
       }, 2000);
       return;
     }
-    const id = BATCH_ORDER[i++];
+    const id = batchOrder[i++];
     const rowEl = document.querySelector(`.rel-row[data-id="${id}"]`);
     if (rowEl) mockSelect(id, rowEl);
     setTimeout(step, 900);
@@ -1885,6 +2192,9 @@ function modalBgClick(e, id) { if (e.target.id === id) closeModal(id); }
 
 // ── Init mockup on load ───────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
+  renderSidebar('Avenged Sevenfold');
+  const initRow = document.querySelector('#mk-sidebar .rel-row[data-id="httk"]');
+  if (initRow) initRow.classList.add('sel');
   renderTracks('httk', false);
   renderLog('httk');
 });
