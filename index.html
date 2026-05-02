@@ -341,6 +341,127 @@ nav.scrolled {
 .wf-btn { background: var(--surface3); border: 1px solid var(--border2); color: var(--fg2); padding: .22rem .65rem; border-radius: 4px; font-size: .72rem; }
 .wf-exec { background: var(--accent); border: none; color: #fff; padding: .22rem .65rem; border-radius: 4px; font-size: .72rem; }
 
+/* ── Mockup interactive additions ─────────────────────────────────────────── */
+.wt-btn, .wt-sel, .wt-batch, .wf-btn, .wf-exec, .wc-tab, .rel-row, .wap-fetch { cursor: pointer; }
+.rel-row:hover { background: rgba(255,255,255,.03); }
+
+/* File menu dropdown */
+.win-menu-wrap { position: relative; }
+.win-menu { cursor: pointer; padding: .15rem .4rem; border-radius: 3px; transition: background .15s; user-select: none; }
+.win-menu:hover, .win-menu.open { background: rgba(255,255,255,.08); color: var(--fg2); }
+.win-dropdown {
+  position: absolute; top: calc(100% + 4px); left: 0; min-width: 168px; z-index: 300;
+  background: #1a1a2c; border: 1px solid var(--border2);
+  border-radius: 7px; box-shadow: 0 12px 40px rgba(0,0,0,.7);
+  padding: .3rem 0; display: none;
+}
+.win-dropdown.open { display: block; animation: fadeIn .12s ease; }
+.win-dd-item {
+  padding: .38rem 1rem; font-size: .8rem; color: var(--fg2); cursor: pointer;
+  transition: background .1s; display: flex; align-items: center; gap: .55rem;
+}
+.win-dd-item:hover { background: rgba(91,141,238,.12); color: var(--fg); }
+.win-dd-item .dd-icon { width: 14px; text-align: center; }
+.win-dd-sep { height: 1px; background: var(--border); margin: .3rem 0; }
+.win-dd-item.dim { color: var(--fg3); }
+
+/* Chip toggles */
+.wap-chip { cursor: pointer; transition: all .15s; user-select: none; }
+.wap-chip.off { background: var(--surface3) !important; color: var(--fg3) !important; border: 1px solid var(--border2); text-decoration: line-through; opacity: .6; }
+
+/* Track row selection */
+.tr-row { cursor: pointer; }
+.tr-row.selected { background: rgba(91,141,238,.1) !important; border-left: 2px solid var(--accent); padding-left: .2rem; }
+
+/* Modal overlay */
+.mock-modal-bg {
+  display: none; position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,.72); backdrop-filter: blur(5px);
+  align-items: center; justify-content: center;
+}
+.mock-modal-bg.open { display: flex; }
+.mock-modal {
+  background: #16162a; border: 1px solid var(--border2);
+  border-radius: var(--radius-lg); box-shadow: 0 32px 100px rgba(0,0,0,.9);
+  width: min(500px, 92vw); max-height: 88vh; overflow-y: auto;
+  padding: 1.4rem; animation: slideUp .2s ease;
+}
+@keyframes slideUp { from { transform: translateY(14px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.mock-modal-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.1rem; }
+.mock-modal-hdr h3 { font-size: .95rem; font-weight: 700; color: var(--fg); }
+.mock-modal-close {
+  background: var(--surface3); border: 1px solid var(--border2); color: var(--fg2);
+  width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: .9rem;
+  display: flex; align-items: center; justify-content: center; transition: all .15s;
+}
+.mock-modal-close:hover { background: var(--red); color: #fff; border-color: var(--red); }
+.mock-lbl { font-size: .72rem; font-weight: 700; color: var(--fg3); letter-spacing: .07em; text-transform: uppercase; margin-bottom: .5rem; }
+.mock-field {
+  width: 100%; background: var(--surface3); border: 1px solid var(--border2);
+  border-radius: 5px; padding: .4rem .6rem; font-size: .8rem; color: var(--fg2);
+  margin-bottom: .85rem; font-family: inherit;
+}
+
+/* Theme grid */
+.theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .45rem; margin-bottom: 1.1rem; }
+.theme-card {
+  border: 2px solid var(--border); border-radius: 7px; overflow: hidden;
+  cursor: pointer; transition: border-color .15s, transform .15s;
+}
+.theme-card:hover { transform: translateY(-2px); }
+.theme-card.active { border-color: var(--accent); }
+.theme-preview { height: 38px; }
+.theme-name { background: rgba(0,0,0,.5); font-size: .7rem; text-align: center; padding: .18rem 0; color: #aaa; }
+.theme-card.active .theme-name { color: var(--accent); font-weight: 700; }
+
+/* Option row */
+.opt-row { display: flex; align-items: center; justify-content: space-between; padding: .5rem 0; border-bottom: 1px solid var(--border); font-size: .82rem; color: var(--fg2); }
+.opt-row:last-child { border: none; }
+.mock-toggle {
+  width: 32px; height: 18px; border-radius: 9px; background: var(--border2);
+  cursor: pointer; transition: background .2s; position: relative; flex-shrink: 0;
+}
+.mock-toggle::after { content:''; position:absolute; top:3px; left:3px; width:12px; height:12px; border-radius:50%; background:#fff; transition: transform .2s; }
+.mock-toggle.on { background: var(--accent); }
+.mock-toggle.on::after { transform: translateX(14px); }
+.mock-save-btn {
+  width: 100%; margin-top: 1rem; background: var(--accent-g); border: none; color: #fff;
+  padding: .55rem; border-radius: 6px; font-size: .85rem; font-weight: 600; cursor: pointer;
+  transition: opacity .2s;
+}
+.mock-save-btn:hover { opacity: .85; }
+
+/* Convert modal */
+.fmt-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: .3rem; margin-bottom: .85rem; }
+.fmt-btn {
+  background: var(--surface3); border: 1px solid var(--border2); color: var(--fg2);
+  text-align: center; padding: .36rem .2rem; border-radius: 5px;
+  font-size: .78rem; cursor: pointer; transition: all .15s;
+}
+.fmt-btn:hover, .fmt-btn.sel { background: var(--accent); color: #fff; border-color: var(--accent); }
+.qual-row { display: flex; gap: .3rem; margin-bottom: .85rem; }
+.qual-btn {
+  flex: 1; background: var(--surface3); border: 1px solid var(--border2); color: var(--fg2);
+  text-align: center; padding: .3rem; border-radius: 5px; font-size: .75rem;
+  cursor: pointer; transition: all .15s;
+}
+.qual-btn:hover, .qual-btn.sel { background: var(--accent); color: #fff; border-color: var(--accent); }
+.conv-source {
+  background: var(--surface3); border: 1px solid var(--border2); border-radius: 5px;
+  padding: .4rem .6rem; font-size: .78rem; color: var(--fg2); margin-bottom: .85rem;
+  font-family: monospace;
+}
+.conv-progress { height: 5px; background: var(--border2); border-radius: 3px; margin: .85rem 0 .5rem; overflow: hidden; }
+.conv-bar { height: 100%; background: var(--accent-g); border-radius: 3px; width: 0; transition: width .08s linear; }
+.conv-status { font-size: .75rem; color: var(--fg3); text-align: center; min-height: 1.2em; }
+.conv-run-btn {
+  width: 100%; margin-top: .7rem; background: var(--accent-g); border: none; color: #fff;
+  padding: .5rem; border-radius: 6px; font-size: .85rem; font-weight: 600; cursor: pointer;
+  transition: opacity .2s;
+}
+.conv-run-btn:hover { opacity: .85; }
+.conv-run-btn:disabled { opacity: .5; cursor: default; }
+
 /* ── Features ─────────────────────────────────────────────────────────────── */
 .features-grid {
   display: grid;
@@ -675,15 +796,23 @@ nav.scrolled {
         <div class="win-bar">
           <div class="win-dots"><div class="wd wd-r"></div><div class="wd wd-y"></div><div class="wd wd-g"></div></div>
           <span class="win-title">Music Manager Ultimate v2.1.0</span>
-          <span class="win-menu">File</span>
+          <div class="win-menu-wrap">
+            <span class="win-menu" id="mk-file-btn" onclick="mockFileMenu()">File ▾</span>
+            <div class="win-dropdown" id="mk-file-dd">
+              <div class="win-dd-item" onclick="mockSettings()"><span class="dd-icon">⚙</span> Settings</div>
+              <div class="win-dd-item" onclick="mockOpenConvert()"><span class="dd-icon">⇄</span> Convert…</div>
+              <div class="win-dd-sep"></div>
+              <div class="win-dd-item dim" onclick="closeMockFile()"><span class="dd-icon">✕</span> Quit</div>
+            </div>
+          </div>
         </div>
 
         <div class="win-toolbar">
-          <div class="wt-btn">Browse</div>
-          <div class="wt-path">/music/Avenged Sevenfold</div>
-          <div class="wt-sel">Avenged Sevenfold ▾</div>
-          <div class="wt-sel">Hail to the King ▾</div>
-          <div class="wt-batch">Batch</div>
+          <div class="wt-btn" onclick="mockBrowse()">Browse</div>
+          <div class="wt-path" id="mk-path">/music/Avenged Sevenfold</div>
+          <div class="wt-sel" id="mk-artist-sel">Avenged Sevenfold ▾</div>
+          <div class="wt-sel" id="mk-album-sel">Hail to the King ▾</div>
+          <div class="wt-batch" onclick="mockBatch()">Batch</div>
         </div>
 
         <div class="win-status">
@@ -730,7 +859,11 @@ nav.scrolled {
               <div class="wap-row"><span class="wap-lbl">Year</span><span class="wap-val"   id="mk-meta-year">2013</span></div>
               <div class="wap-row"><span class="wap-lbl">Genre</span><span class="wap-val"  id="mk-meta-genre">Metal</span></div>
             </div>
-            <div class="wap-chips"><div class="wap-chip">Art</div><div class="wap-chip">Tags</div><div class="wap-chip">Genre</div></div>
+            <div class="wap-chips">
+              <div class="wap-chip" onclick="toggleChip(this)" title="Toggle art embedding">Art</div>
+              <div class="wap-chip" onclick="toggleChip(this)" title="Toggle tag writing">Tags</div>
+              <div class="wap-chip" onclick="toggleChip(this)" title="Toggle genre tag">Genre</div>
+            </div>
             <div class="wap-fetch" id="mk-fetch" onclick="mockFetch()" style="cursor:pointer;">Fetch Artwork</div>
           </div>
 
@@ -739,7 +872,7 @@ nav.scrolled {
         <div class="win-footer">
           <span id="mk-footer-txt">11 / 11 tracks matched</span>
           <div class="wf-btns">
-            <div class="wf-btn">Convert</div>
+            <div class="wf-btn" onclick="mockOpenConvert()">Convert</div>
             <div class="wf-exec" id="mk-exec" onclick="mockExecute()" style="cursor:pointer;">Execute Rename + Tag</div>
             <div class="wf-btn">Refresh</div>
             <div class="wf-btn" id="mk-undo" onclick="mockUndo()" style="cursor:pointer;">Undo</div>
@@ -748,6 +881,76 @@ nav.scrolled {
 
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ── Settings modal ── -->
+<div class="mock-modal-bg" id="modal-settings" onclick="modalBgClick(event,'modal-settings')">
+  <div class="mock-modal">
+    <div class="mock-modal-hdr">
+      <h3>⚙ Settings</h3>
+      <div class="mock-modal-close" onclick="closeModal('modal-settings')">✕</div>
+    </div>
+
+    <div class="mock-lbl">Spotify API</div>
+    <input class="mock-field" type="text" value="••••••••••••••••••••••••••••••••" readonly>
+    <input class="mock-field" type="text" value="••••••••••••••••••••••••••••••••" readonly style="margin-bottom:1.1rem">
+
+    <div class="mock-lbl">Theme</div>
+    <div class="theme-grid" id="theme-grid">
+      <!-- filled by JS -->
+    </div>
+
+    <div class="mock-lbl">Options</div>
+    <div class="opt-row">
+      Auto-convert after tagging
+      <div class="mock-toggle" id="opt-autoconv" onclick="this.classList.toggle('on')"></div>
+    </div>
+    <div class="opt-row">
+      Write album art to all formats
+      <div class="mock-toggle on" onclick="this.classList.toggle('on')"></div>
+    </div>
+
+    <button class="mock-save-btn" onclick="saveMockSettings()">Save Settings</button>
+  </div>
+</div>
+
+<!-- ── Convert modal ── -->
+<div class="mock-modal-bg" id="modal-convert" onclick="modalBgClick(event,'modal-convert')">
+  <div class="mock-modal">
+    <div class="mock-modal-hdr">
+      <h3>⇄ Convert Audio</h3>
+      <div class="mock-modal-close" onclick="closeModal('modal-convert')">✕</div>
+    </div>
+
+    <div class="mock-lbl">Source</div>
+    <div class="conv-source" id="conv-source">/music/Avenged Sevenfold/Hail to the King/ (8 files)</div>
+
+    <div class="mock-lbl">Output Format</div>
+    <div class="fmt-grid">
+      <div class="fmt-btn" onclick="selFmt(this)">MP3</div>
+      <div class="fmt-btn sel" onclick="selFmt(this)">FLAC</div>
+      <div class="fmt-btn" onclick="selFmt(this)">M4A</div>
+      <div class="fmt-btn" onclick="selFmt(this)">OGG</div>
+      <div class="fmt-btn" onclick="selFmt(this)">WAV</div>
+    </div>
+
+    <div class="mock-lbl">Quality</div>
+    <div class="qual-row">
+      <div class="qual-btn" onclick="selQual(this)">Low</div>
+      <div class="qual-btn sel" onclick="selQual(this)">Medium</div>
+      <div class="qual-btn" onclick="selQual(this)">High</div>
+      <div class="qual-btn" onclick="selQual(this)">Best</div>
+    </div>
+
+    <div class="opt-row" style="border:none;padding:.2rem 0">
+      Delete source files after conversion
+      <div class="mock-toggle" onclick="this.classList.toggle('on')"></div>
+    </div>
+
+    <div class="conv-progress"><div class="conv-bar" id="conv-bar"></div></div>
+    <div class="conv-status" id="conv-status"></div>
+    <button class="conv-run-btn" id="conv-btn" onclick="runConvert()">Convert</button>
   </div>
 </div>
 
@@ -1317,7 +1520,7 @@ function renderTracks(id, done) {
   const container = document.getElementById('mk-tracks');
   container.innerHTML = rel.tracks.map(t => {
     if (done) {
-      return `<div class="tr-row" style="opacity:0;animation:fadeIn .3s ease forwards;animation-delay:${t.n * 60}ms">
+      return `<div class="tr-row" onclick="selectTrackRow(this)" style="opacity:0;animation:fadeIn .3s ease forwards;animation-delay:${t.n * 60}ms">
         <span class="tr-n">${t.n}</span>
         <span class="tr-old" style="text-decoration:line-through;color:var(--fg3)">${t.old}</span>
         <span class="tr-arr" style="color:var(--green)">✓</span>
@@ -1325,7 +1528,7 @@ function renderTracks(id, done) {
         <span class="tr-score" style="background:rgba(61,220,132,.15);color:var(--green)">Done</span>
       </div>`;
     }
-    return `<div class="tr-row">
+    return `<div class="tr-row" onclick="selectTrackRow(this)">
       <span class="tr-n">${t.n}</span>
       <span class="tr-old">${t.old}</span>
       <span class="tr-arr">→</span>
@@ -1473,7 +1676,214 @@ function mockFetch() {
   }, 900);
 }
 
-// Init mockup on load
+// ── File menu ─────────────────────────────────────────────────────────────────
+function mockFileMenu() {
+  const dd = document.getElementById('mk-file-dd');
+  const btn = document.getElementById('mk-file-btn');
+  const open = dd.classList.toggle('open');
+  btn.classList.toggle('open', open);
+  if (open) {
+    const close = (e) => {
+      if (!btn.contains(e.target)) {
+        dd.classList.remove('open'); btn.classList.remove('open');
+        document.removeEventListener('click', close);
+      }
+    };
+    setTimeout(() => document.addEventListener('click', close), 0);
+  }
+}
+function closeMockFile() {
+  document.getElementById('mk-file-dd').classList.remove('open');
+  document.getElementById('mk-file-btn').classList.remove('open');
+}
+
+// ── Browse simulation ─────────────────────────────────────────────────────────
+const BROWSE_PATHS = [
+  ['/music/Avenged Sevenfold', 'Avenged Sevenfold'],
+  ['/music/Metallica', 'Metallica'],
+  ['/music/Iron Maiden', 'Iron Maiden'],
+  ['/music/Tool', 'Tool'],
+];
+let browseIdx = 0;
+function mockBrowse() {
+  browseIdx = (browseIdx + 1) % BROWSE_PATHS.length;
+  const [path, artist] = BROWSE_PATHS[browseIdx];
+  const pathEl = document.getElementById('mk-path');
+  const artEl  = document.getElementById('mk-artist-sel');
+  pathEl.style.transition = 'opacity .15s';
+  pathEl.style.opacity = '0';
+  setTimeout(() => {
+    pathEl.textContent = path;
+    artEl.textContent  = artist + ' ▾';
+    pathEl.style.opacity = '1';
+  }, 150);
+}
+
+// ── Batch simulation ──────────────────────────────────────────────────────────
+const BATCH_ORDER = ['stt','wtf','coe','nm','httk','ts','libad'];
+let batchRunning = false;
+function mockBatch() {
+  if (batchRunning) return;
+  batchRunning = true;
+  executed = false;
+  const btn = document.querySelector('.wt-batch');
+  btn.textContent = 'Batching…';
+  btn.style.background = 'var(--amber)';
+  let i = 0;
+  const step = () => {
+    if (i >= BATCH_ORDER.length) {
+      btn.textContent = '✓ Batch done';
+      btn.style.background = 'var(--green)';
+      setTimeout(() => {
+        btn.textContent = 'Batch';
+        btn.style.background = '';
+        batchRunning = false;
+      }, 2000);
+      return;
+    }
+    const id = BATCH_ORDER[i++];
+    const rowEl = document.querySelector(`.rel-row[data-id="${id}"]`);
+    if (rowEl) mockSelect(id, rowEl);
+    setTimeout(step, 900);
+  };
+  step();
+}
+
+// ── Chip toggle ───────────────────────────────────────────────────────────────
+function toggleChip(el) { el.classList.toggle('off'); }
+
+// ── Track row selection ───────────────────────────────────────────────────────
+function selectTrackRow(el) {
+  document.querySelectorAll('#mk-tracks .tr-row').forEach(r => r.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+// ── Settings modal ────────────────────────────────────────────────────────────
+const THEMES = {
+  Dark:      { s:'#13131e', s2:'#1a1a28', s3:'#222235', b:'#252538', b2:'#2e2e48', acc:'#5b8dee', fg:'#e8e8f0', fg2:'#9898b8', fg3:'#55556a', p:'linear-gradient(135deg,#0a0a14,#13131e)' },
+  Midnight:  { s:'#0d0d28', s2:'#111138', s3:'#15154a', b:'#1a1a50', b2:'#202060', acc:'#6066f5', fg:'#d8d8f8', fg2:'#8888c8', fg3:'#44446a', p:'linear-gradient(135deg,#08081e,#0d0d28)' },
+  Emerald:   { s:'#0a1e0c', s2:'#0f2612', s3:'#142e18', b:'#183620', b2:'#1e3e26', acc:'#2ecc71', fg:'#d0f0d8', fg2:'#70a880', fg3:'#3a6040', p:'linear-gradient(135deg,#060e08,#0a1e0c)' },
+  Amethyst:  { s:'#180a2e', s2:'#200f3c', s3:'#281448', b:'#301858', b2:'#381e62', acc:'#9b59b6', fg:'#e8d0f8', fg2:'#a870c0', fg3:'#604870', p:'linear-gradient(135deg,#0e0618,#180a2e)' },
+  Crimson:   { s:'#220a0a', s2:'#2c1010', s3:'#361414', b:'#401818', b2:'#4c1e1e', acc:'#e74c3c', fg:'#f8d8d8', fg2:'#c08080', fg3:'#804040', p:'linear-gradient(135deg,#160606,#220a0a)' },
+  Forest:    { s:'#091806', s2:'#0d2009', s3:'#12280c', b:'#163010', b2:'#1c3814', acc:'#27ae60', fg:'#d4e8cc', fg2:'#78a870', fg3:'#466040', p:'linear-gradient(135deg,#050f04,#091806)' },
+  Ocean:     { s:'#060e1e', s2:'#0a1428', s3:'#0e1a30', b:'#12203a', b2:'#162644', acc:'#0095d5', fg:'#c8e4f8', fg2:'#6090b8', fg3:'#385868', p:'linear-gradient(135deg,#04080e,#060e1e)' },
+  Slate:     { s:'#141418', s2:'#1c1c22', s3:'#24242c', b:'#2c2c38', b2:'#343444', acc:'#7878cc', fg:'#d8d8e8', fg2:'#8888a8', fg3:'#505068', p:'linear-gradient(135deg,#0c0c10,#141418)' },
+  'Solar':   { s:'#1e1808', s2:'#28200c', s3:'#322810', b:'#3c3018', b2:'#46381e', acc:'#f5a623', fg:'#f8edd0', fg2:'#b89870', fg3:'#706040', p:'linear-gradient(135deg,#100e04,#1e1808)' },
+};
+let activeTheme = 'Dark';
+
+function buildThemeGrid() {
+  const grid = document.getElementById('theme-grid');
+  grid.innerHTML = Object.entries(THEMES).map(([name, t]) =>
+    `<div class="theme-card ${name === activeTheme ? 'active' : ''}" onclick="applyTheme('${name}',this)">
+      <div class="theme-preview" style="background:${t.p}; border-bottom: 3px solid ${t.acc}"></div>
+      <div class="theme-name">${name}</div>
+    </div>`
+  ).join('');
+}
+
+function applyTheme(name, cardEl) {
+  const t = THEMES[name];
+  if (!t) return;
+  activeTheme = name;
+  const win = document.querySelector('.mockup-window');
+  const bar = document.querySelector('.win-bar');
+  win.style.setProperty('--surface',  t.s);
+  win.style.setProperty('--surface2', t.s2);
+  win.style.setProperty('--surface3', t.s3);
+  win.style.setProperty('--border',   t.b);
+  win.style.setProperty('--border2',  t.b2);
+  win.style.setProperty('--accent',   t.acc);
+  win.style.setProperty('--fg',       t.fg);
+  win.style.setProperty('--fg2',      t.fg2);
+  win.style.setProperty('--fg3',      t.fg3);
+  bar.style.background = t.s.replace('13131e','0d0d1e');
+  document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
+  if (cardEl) cardEl.classList.add('active');
+  // update chips that are still on
+  document.querySelectorAll('.wap-chip:not(.off)').forEach(c => {
+    c.style.background = t.acc;
+  });
+}
+
+function mockSettings() {
+  closeMockFile();
+  buildThemeGrid();
+  openModal('modal-settings');
+}
+
+function saveMockSettings() {
+  const btn = document.querySelector('.mock-save-btn');
+  btn.textContent = '✓ Saved';
+  setTimeout(() => { btn.textContent = 'Save Settings'; closeModal('modal-settings'); }, 1000);
+}
+
+// ── Convert modal ─────────────────────────────────────────────────────────────
+function mockOpenConvert() {
+  closeMockFile();
+  const rel = RELEASES[currentRelease];
+  document.getElementById('conv-source').textContent =
+    `/music/Avenged Sevenfold/${rel.title}/ (${rel.tracks.length} files)`;
+  document.getElementById('conv-bar').style.width = '0';
+  document.getElementById('conv-status').textContent = '';
+  const btn = document.getElementById('conv-btn');
+  btn.textContent = 'Convert';
+  btn.disabled = false;
+  openModal('modal-convert');
+}
+
+function selFmt(el) {
+  el.closest('.fmt-grid').querySelectorAll('.fmt-btn').forEach(b => b.classList.remove('sel'));
+  el.classList.add('sel');
+}
+function selQual(el) {
+  el.closest('.qual-row').querySelectorAll('.qual-btn').forEach(b => b.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+function runConvert() {
+  const btn = document.getElementById('conv-btn');
+  const bar = document.getElementById('conv-bar');
+  const status = document.getElementById('conv-status');
+  const fmt = document.querySelector('.fmt-btn.sel')?.textContent || 'FLAC';
+  const rel = RELEASES[currentRelease];
+  btn.disabled = true;
+  btn.textContent = 'Converting…';
+  let pct = 0;
+  const steps = [
+    [10, `Probing ${rel.tracks.length} files…`],
+    [30, 'Transcoding track 1…'],
+    [50, `Transcoding track ${Math.ceil(rel.tracks.length/2)}…`],
+    [75, `Transcoding track ${rel.tracks.length - 1}…`],
+    [90, 'Writing cover art…'],
+    [100, `✓ Done — ${rel.tracks.length} files → ${fmt}`],
+  ];
+  let si = 0;
+  const tick = () => {
+    if (si >= steps.length) {
+      btn.textContent = '✓ Complete';
+      setTimeout(() => closeModal('modal-convert'), 1500);
+      return;
+    }
+    const [target, msg] = steps[si++];
+    status.textContent = msg;
+    const anim = () => {
+      if (pct >= target) { setTimeout(tick, 400); return; }
+      pct = Math.min(pct + 2, target);
+      bar.style.width = pct + '%';
+      requestAnimationFrame(anim);
+    };
+    anim();
+  };
+  tick();
+}
+
+// ── Modal helpers ─────────────────────────────────────────────────────────────
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function modalBgClick(e, id) { if (e.target.id === id) closeModal(id); }
+
+// ── Init mockup on load ───────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   renderTracks('httk', false);
   renderLog('httk');
