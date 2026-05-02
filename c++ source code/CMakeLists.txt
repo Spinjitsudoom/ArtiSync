@@ -103,7 +103,6 @@ set(SOURCES
     metadata_writer.cpp
     remux_engine.cpp
     spotify_engine.cpp
-    mb_engine.cpp
     music_organizer.cpp
 )
 

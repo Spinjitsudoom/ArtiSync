@@ -48,13 +48,23 @@ if [ ! -f "$APPIMAGETOOL" ]; then
     chmod +x "$APPIMAGETOOL"
 fi
 
-# ── Build minimal AppDir (binary only; uses system Qt6) ───────────────────────
+# ── Build minimal AppDir (binary + bundled imageformats; uses system Qt6) ─────
 # Bundling Qt6 from the sysroot causes init crashes on Fedora Atomic due to
-# HWCAPS library variants. Qt6 is installed at runtime so we reference it there.
+# HWCAPS library variants. Qt6 is used at runtime; only imageformats plugins
+# are bundled so JPEG cover art works without depending on a specific system path.
 rm -rf "$APPDIR"
 mkdir -p "$APPDIR/usr/bin"
+mkdir -p "$APPDIR/usr/plugins/imageformats"
 
 cp "$CMAKE_BUILD/MusicManager" "$APPDIR/usr/bin/"
+
+# Bundle the JPEG imageformats plugin (libqjpeg.so depends only on system
+# Qt6 libs + libjpeg, which are guaranteed on any Qt6-capable system)
+SYSTEM_IMAGEFORMATS="/usr/lib64/qt6/plugins/imageformats"
+for plugin in libqjpeg.so libqgif.so libqwebp.so libqsvg.so; do
+    [ -f "$SYSTEM_IMAGEFORMATS/$plugin" ] && \
+        cp "$SYSTEM_IMAGEFORMATS/$plugin" "$APPDIR/usr/plugins/imageformats/"
+done
 
 cp "$SOURCE_DIR/resources/MusicManager.png" \
    "$APPDIR/com.musicmanager.MusicManager.png"
@@ -76,7 +86,8 @@ cat > "$APPDIR/AppRun" <<'APPRUN'
 SELF="$(readlink -f "$0")"
 HERE="${SELF%/*}"
 
-export QT_PLUGIN_PATH=/usr/lib64/qt6/plugins
+# Bundled imageformats plugins + system fallback for platform/other plugins
+export QT_PLUGIN_PATH="$HERE/usr/plugins:/usr/lib64/qt6/plugins"
 export QT_QPA_PLATFORM_PLUGIN_PATH=/usr/lib64/qt6/plugins/platforms
 
 exec "$HERE/usr/bin/MusicManager" "$@"

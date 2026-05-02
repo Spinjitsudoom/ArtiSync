@@ -10,6 +10,7 @@
 #include <QString>
 #include <QByteArray>
 #include <QColor>
+#include <atomic>
 
 // Forward declarations
 class QComboBox;
@@ -121,6 +122,7 @@ private:
 
     // Sidebar item data (release id → index in m_knownReleases)
     QMap<QString, int> m_sidebarMap;
+    std::atomic<int>   m_sidebarGeneration{0};
 
     // ── UI builder helpers ────────────────────────────────────────────────────
     void setupUI();
@@ -145,6 +147,7 @@ private:
 
     void populateSidebar(const QVector<Release>& releases);
     void highlightSidebarRow(const QString& releaseId);
+    void loadSidebarThumbs(QVector<Release> releases, int generation);
 
     void showReviewDialog();
     void executeRename();

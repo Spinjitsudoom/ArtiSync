@@ -28,6 +28,7 @@
 #include <QThread>
 #include <QPixmap>
 #include <QImage>
+#include <QPainter>
 #include <QFontMetrics>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -221,6 +222,8 @@ void MusicManager::buildSidebar(QWidget* parent) {
 
     m_sidebar = new QListWidget;
     m_sidebar->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_sidebar->setIconSize(QSize(64, 64));
+    m_sidebar->setSpacing(1);
     connect(m_sidebar, &QListWidget::itemClicked,
             this, &MusicManager::onSidebarItemClicked);
     layout->addWidget(m_sidebar, 1);
@@ -473,15 +476,34 @@ void MusicManager::populateSidebar(const QVector<Release>& releases) {
     m_sidebarMap.clear();
     m_knownReleases = releases;
 
+    // Placeholder: dark square with faint music note
+    QPixmap ph(64, 64);
+    ph.fill(QColor("#1e1e1e"));
+    {
+        QPainter p(&ph);
+        p.setPen(QColor("#333333"));
+        p.setFont(QFont("sans-serif", 22));
+        p.drawText(QRect(0, 0, 64, 64), Qt::AlignCenter, QStringLiteral("♪"));
+    }
+    QIcon phIcon(ph);
+
     for (int i = 0; i < releases.size(); ++i) {
         const auto& r = releases[i];
         QString text = QString::fromStdString(r.title) + "\n" +
                        QString::fromStdString(r.year) + "  " +
                        QString::fromStdString(r.type);
         auto* item = new QListWidgetItem(text, m_sidebar);
+        item->setIcon(phIcon);
+        item->setSizeHint(QSize(0, 78));
         item->setData(Qt::UserRole, QString::fromStdString(r.id));
         m_sidebarMap[QString::fromStdString(r.id)] = i;
     }
+
+    // Load thumbnails in background; generation guards against stale updates
+    int gen = ++m_sidebarGeneration;
+    std::thread([this, releases, gen]() {
+        loadSidebarThumbs(releases, gen);
+    }).detach();
 }
 
 void MusicManager::highlightSidebarRow(const QString& releaseId) {
@@ -489,6 +511,43 @@ void MusicManager::highlightSidebarRow(const QString& releaseId) {
         auto* item = m_sidebar->item(i);
         bool sel = item->data(Qt::UserRole).toString() == releaseId;
         item->setSelected(sel);
+    }
+}
+
+void MusicManager::loadSidebarThumbs(QVector<Release> releases, int generation) {
+    for (int i = 0; i < releases.size(); ++i) {
+        if (m_sidebarGeneration.load() != generation) return;
+
+        if (i > 0)
+            std::this_thread::sleep_for(std::chrono::milliseconds(30));
+
+        if (m_sidebarGeneration.load() != generation) return;
+
+        auto bytes = m_engine->getCoverArtBytes(releases[i].id);
+        if (bytes.empty()) continue;
+
+        if (m_sidebarGeneration.load() != generation) return;
+
+        QByteArray qbytes(reinterpret_cast<const char*>(bytes.data()), (int)bytes.size());
+
+        QMetaObject::invokeMethod(this, [this, qbytes, i, generation]() {
+            if (m_sidebarGeneration.load() != generation) return;
+            auto* item = m_sidebar->item(i);
+            if (!item) return;
+
+            QImage img;
+            img.loadFromData(reinterpret_cast<const uchar*>(qbytes.constData()),
+                             qbytes.size());
+            if (img.isNull()) return;
+
+            // Scale to fill 64×64 and crop from centre
+            QPixmap pm = QPixmap::fromImage(img).scaled(
+                64, 64, Qt::KeepAspectRatioByExpanding, Qt::SmoothTransformation);
+            if (pm.width() > 64 || pm.height() > 64)
+                pm = pm.copy((pm.width() - 64) / 2, (pm.height() - 64) / 2, 64, 64);
+
+            item->setIcon(QIcon(pm));
+        }, Qt::QueuedConnection);
     }
 }
 
