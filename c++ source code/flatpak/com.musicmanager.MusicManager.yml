@@ -10,7 +10,10 @@ finish-args:
   - --socket=fallback-x11
   - --device=dri
   - --share=network
-  - --filesystem=home
+  - --filesystem=xdg-music:rw
+  - --filesystem=xdg-download:rw
+  - --filesystem=/run/media:rw
+  - --filesystem=/mnt:rw
   - --talk-name=org.freedesktop.Notifications
 
 modules:
@@ -36,6 +39,8 @@ modules:
           /app/share/icons/hicolor/256x256/apps/com.musicmanager.MusicManager.png
       - install -Dm644 flatpak/com.musicmanager.MusicManager.desktop
           /app/share/applications/com.musicmanager.MusicManager.desktop
+      - install -Dm644 flatpak/com.musicmanager.MusicManager.metainfo.xml
+          /app/share/metainfo/com.musicmanager.MusicManager.metainfo.xml
     sources:
       - type: dir
         path: ..

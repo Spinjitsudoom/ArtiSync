@@ -20,13 +20,21 @@ class BaseEngine:
 
     def _normalize_for_matching(self, title):
         """
-        Normalise a title for fuzzy comparison only — never used for output names.
-        Handles all common 'featuring' formats and strips 'The' prefixes.
+        Normalise a title for fuzzy comparison only.
+        
+        Handles all common 'featuring' formats:
+          ft. / feat. / featuring / with / w/ / (ft. …) / [feat. …]
+        Strips 'The ' prefix from artist names.
+        Lowercases and collapses whitespace.
         """
         s = title.lower()
         s = re.sub(r"[\(\[\{]", " ", s)
         s = re.sub(r"[\)\]\}]", " ", s)
-        s = re.sub(r"\b(featuring|feat\.?|ft\.?|with|w/)\s+", " feat ", s)
+        s = re.sub(
+            r"\b(featuring|feat\.?|ft\.?|with|w/)\s+",
+            " feat ", s
+        )
+        # Strip leading 'the ' from each artist name after feat marker
         s = re.sub(r"\bthe\s+", " ", s)
         s = re.sub(r"\s+", " ", s).strip()
         return s
@@ -47,33 +55,6 @@ class BaseEngine:
         if len(fn_tokens) >= 2 and fn_tokens.issubset(tr_tokens):
             base = max(base, 85)
         return base
-        """
-        Normalise a title for fuzzy comparison only — never used for output names.
-
-        Handles all common 'featuring' formats:
-          ft. / feat. / featuring / with / w/ / (ft. …) / [feat. …]
-        Strips 'The ' prefix from artist names so 'The Smashing Pumpkins'
-        matches 'Smashing Pumpkins'.
-        Lowercases and collapses whitespace.
-        """
-        s = title.lower()
-
-        # Normalise all featuring variations to a plain space-separated token
-        # so "feat.", "ft.", "featuring", "w/", "with" all look the same
-        s = re.sub(r"[\(\[\{]", " ", s)
-        s = re.sub(r"[\)\]\}]", " ", s)
-        s = re.sub(
-            r"\b(featuring|feat\.?|ft\.?|with|w/)\s+",
-            " feat ", s
-        )
-
-        # Strip leading 'the ' from each artist name after feat marker
-        # e.g. "feat the smashing pumpkins" → "feat smashing pumpkins"
-        s = re.sub(r"\bthe\s+", " ", s)
-
-        # Collapse whitespace
-        s = re.sub(r"\s+", " ", s).strip()
-        return s
 
     def _sanitize(self, title):
         """Replace illegal filename characters with a space, collapse doubles."""

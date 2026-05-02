@@ -67,9 +67,17 @@ jobs:
           arch: clang_64
           cache: true
 
+      - name: Install dependencies via Homebrew
+        run: |
+          brew install pkg-config taglib nlohmann-json
+          # libcurl ships with macOS; nlohmann-json + taglib from Homebrew
+          # avoids compiling them from source via FetchContent
+
       - name: Configure
         working-directory: "c++ source code"
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="$(brew --prefix)"
 
       - name: Build
         working-directory: "c++ source code"
@@ -107,7 +115,6 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Create release if it doesn't exist yet, otherwise just upload
           gh release create "${{ github.ref_name }}" \
             --title "MusicManager ${{ github.ref_name }}" \
             --generate-notes \

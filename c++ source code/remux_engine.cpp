@@ -6,9 +6,12 @@
 #include <array>
 #include <sstream>
 #include <stdexcept>
+#include <nlohmann/json.hpp>
 
 #ifdef _WIN32
   #include <windows.h>
+  #define popen  _popen
+  #define pclose _pclose
 #else
   #include <unistd.h>
 #endif
@@ -210,9 +213,15 @@ RemuxEngine::convertBatch(
 
 std::map<std::string, std::string> RemuxEngine::probe(const std::string& path) {
     if (m_ffprobe.empty() || !fs::exists(path)) return {};
+#ifdef _WIN32
+    std::string cmd =
+        "\"" + m_ffprobe + "\" -v quiet -print_format json -show_streams -show_format "
+        "\"" + path + "\"";
+#else
     std::string cmd =
         "'" + m_ffprobe + "' -v quiet -print_format json -show_streams -show_format "
         "'" + path + "' 2>/dev/null";
+#endif
     std::string output;
     FILE* pipe = popen(cmd.c_str(), "r");
     if (!pipe) return {};
@@ -220,35 +229,28 @@ std::map<std::string, std::string> RemuxEngine::probe(const std::string& path) {
     while (fgets(buf, sizeof(buf), pipe)) output += buf;
     pclose(pipe);
 
-    // Very simple JSON parsing for the fields we need
-    auto extract = [&](const std::string& key) -> std::string {
-        std::string search = "\"" + key + "\": \"";
-        size_t pos = output.find(search);
-        if (pos == std::string::npos) {
-            search = "\"" + key + "\": ";
-            pos = output.find(search);
-            if (pos == std::string::npos) return "";
-            pos += search.size();
-            size_t end = output.find_first_of(",\n}", pos);
-            return (end != std::string::npos) ? output.substr(pos, end - pos) : "";
-        }
-        pos += search.size();
-        size_t end = output.find('"', pos);
-        return (end != std::string::npos) ? output.substr(pos, end - pos) : "";
-    };
-
     std::map<std::string, std::string> info;
-    info["codec"]        = extract("codec_name");
-    info["bitrate_kbps"] = extract("bit_rate");
-    info["duration_s"]   = extract("duration");
-    info["sample_rate"]  = extract("sample_rate");
-    // Convert bit_rate from bps to kbps if numeric
-    if (!info["bitrate_kbps"].empty()) {
-        try {
-            info["bitrate_kbps"] = std::to_string(
-                std::stoi(info["bitrate_kbps"]) / 1000);
-        } catch (...) {}
+    try {
+        auto data = nlohmann::json::parse(output);
+        if (data.contains("streams") && data["streams"].is_array() && !data["streams"].empty()) {
+            auto& stream = data["streams"][0];
+            if (stream.contains("codec_name")) info["codec"] = stream["codec_name"];
+            if (stream.contains("sample_rate")) info["sample_rate"] = stream["sample_rate"];
+        }
+        
+        if (data.contains("format")) {
+            auto& format = data["format"];
+            if (format.contains("duration")) info["duration_s"] = format["duration"];
+            if (format.contains("bit_rate")) {
+                long long bps = std::stoll(format["bit_rate"].get<std::string>());
+                info["bitrate_kbps"] = std::to_string(bps / 1000);
+            }
+        }
+    } catch (const std::exception& e) {
+        // Fallback or error logging could go here
+        return {};
     }
+
     return info;
 }
 

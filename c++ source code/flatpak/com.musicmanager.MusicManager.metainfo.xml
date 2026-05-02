@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.musicmanager.MusicManager</id>
+  <name>Music Manager Ultimate</name>
+  <summary>Organize and tag your music library</summary>
+  <description>
+    <p>
+      Fetches metadata from Spotify, renames audio files, writes embedded tags,
+      downloads cover art, and converts between audio formats.
+    </p>
+  </description>
+  <developer id="com.musicmanager">
+    <name>Etienne Axiak</name>
+  </developer>
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT</project_license>
+  <url type="homepage">https://github.com/Spinjitsudoom/MusicManagerUltimate</url>
+  <categories>
+    <category>AudioVideo</category>
+    <category>Audio</category>
+    <category>Music</category>
+  </categories>
+  <releases>
+    <release version="2.1.0" date="2026-05-03"/>
+  </releases>
+  <content_rating type="oars-1.1"/>
+</component>
