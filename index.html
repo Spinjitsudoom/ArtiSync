@@ -676,9 +676,9 @@ nav.scrolled {
         </div>
 
         <div class="win-status">
-          <div class="ws-dot" style="color:var(--green)">✓ Hail to the King (2013)</div>
-          <div class="ws-dot" style="color:var(--accent)">11 / 11 matched</div>
-          <div class="ws-dot">0 missing</div>
+          <div class="ws-dot" id="mk-status-album" style="color:var(--green)">✓ Hail to the King (2013)</div>
+          <div class="ws-dot" id="mk-status-match" style="color:var(--accent)">11 / 11 matched</div>
+          <div class="ws-dot" id="mk-status-missing">0 missing</div>
           <div class="ws-dot" style="color:var(--green)">● Spotify connected</div>
         </div>
 
@@ -686,53 +686,52 @@ nav.scrolled {
 
           <div class="wsb">
             <div class="wsb-hdr">Spotify Releases <span class="wsb-badge">34</span></div>
-            <div class="wsb-list">
-              <div class="rel-row"><div class="rel-thumb" style="background:linear-gradient(135deg,#1a0a2e,#3a1060)">♪</div><div class="rel-info"><div class="rel-title">Sounding the Seventh Trumpet</div><div class="rel-meta">2001 · Album</div></div><div class="rel-n">13</div></div>
-              <div class="rel-row"><div class="rel-thumb" style="background:linear-gradient(135deg,#0a1a2e,#102a60)">♪</div><div class="rel-info"><div class="rel-title">Waking the Fallen</div><div class="rel-meta">2003 · Album</div></div><div class="rel-n">12</div></div>
-              <div class="rel-row"><div class="rel-thumb" style="background:linear-gradient(135deg,#2e0a0a,#601010)">♪</div><div class="rel-info"><div class="rel-title">City of Evil</div><div class="rel-meta">2005 · Album</div></div><div class="rel-n">11</div></div>
-              <div class="rel-row"><div class="rel-thumb" style="background:linear-gradient(135deg,#0a2e0a,#106010)">♪</div><div class="rel-info"><div class="rel-title">Nightmare</div><div class="rel-meta">2010 · Album</div></div><div class="rel-n">11</div></div>
-              <div class="rel-row sel"><div class="rel-thumb" style="background:linear-gradient(135deg,#1e1e06,#3a3a00)">♫</div><div class="rel-info"><div class="rel-title">Hail to the King</div><div class="rel-meta">2013 · Album</div></div><div class="rel-n">11</div></div>
-              <div class="rel-row"><div class="rel-thumb" style="background:linear-gradient(135deg,#1a0a1a,#3a003a)">♪</div><div class="rel-info"><div class="rel-title">The Stage</div><div class="rel-meta">2016 · Album</div></div><div class="rel-n">11</div></div>
-              <div class="rel-row"><div class="rel-thumb" style="background:linear-gradient(135deg,#0a1a1a,#003a3a)">♪</div><div class="rel-info"><div class="rel-title">Life Is But a Dream...</div><div class="rel-meta">2023 · Album</div></div><div class="rel-n">10</div></div>
+            <div class="wsb-list" id="mk-sidebar">
+              <div class="rel-row" data-id="stt" onclick="mockSelect('stt',this)"><div class="rel-thumb" style="background:linear-gradient(135deg,#1a0a2e,#3a1060)">♪</div><div class="rel-info"><div class="rel-title">Sounding the Seventh Trumpet</div><div class="rel-meta">2001 · Album</div></div><div class="rel-n">13</div></div>
+              <div class="rel-row" data-id="wtf" onclick="mockSelect('wtf',this)"><div class="rel-thumb" style="background:linear-gradient(135deg,#0a1a2e,#102a60)">♪</div><div class="rel-info"><div class="rel-title">Waking the Fallen</div><div class="rel-meta">2003 · Album</div></div><div class="rel-n">12</div></div>
+              <div class="rel-row" data-id="coe" onclick="mockSelect('coe',this)"><div class="rel-thumb" style="background:linear-gradient(135deg,#2e0a0a,#601010)">♪</div><div class="rel-info"><div class="rel-title">City of Evil</div><div class="rel-meta">2005 · Album</div></div><div class="rel-n">11</div></div>
+              <div class="rel-row" data-id="nm"  onclick="mockSelect('nm',this)"><div class="rel-thumb" style="background:linear-gradient(135deg,#0a2e0a,#106010)">♪</div><div class="rel-info"><div class="rel-title">Nightmare</div><div class="rel-meta">2010 · Album</div></div><div class="rel-n">11</div></div>
+              <div class="rel-row sel" data-id="httk" onclick="mockSelect('httk',this)"><div class="rel-thumb" style="background:linear-gradient(135deg,#1e1e06,#3a3a00)">♫</div><div class="rel-info"><div class="rel-title">Hail to the King</div><div class="rel-meta">2013 · Album</div></div><div class="rel-n">11</div></div>
+              <div class="rel-row" data-id="ts"   onclick="mockSelect('ts',this)"><div class="rel-thumb" style="background:linear-gradient(135deg,#1a0a1a,#3a003a)">♪</div><div class="rel-info"><div class="rel-title">The Stage</div><div class="rel-meta">2016 · Album</div></div><div class="rel-n">11</div></div>
+              <div class="rel-row" data-id="libad" onclick="mockSelect('libad',this)"><div class="rel-thumb" style="background:linear-gradient(135deg,#0a1a1a,#003a3a)">♪</div><div class="rel-info"><div class="rel-title">Life Is But a Dream...</div><div class="rel-meta">2023 · Album</div></div><div class="rel-n">10</div></div>
             </div>
           </div>
 
           <div class="wc">
-            <div class="wc-tabs"><div class="wc-tab on">Preview</div><div class="wc-tab">Log</div></div>
-            <div class="wc-body">
-              <div class="prev-hdr">11 matched · 0 unmatched · 11 total</div>
-              <div class="tr-row"><span class="tr-n">1</span><span class="tr-old">01 Shepherd of Fire.flac</span><span class="tr-arr">→</span><span class="tr-new">01 - Shepherd of Fire.flac</span><span class="tr-score s-hi">100%</span></div>
-              <div class="tr-row"><span class="tr-n">2</span><span class="tr-old">02 Hail to the King.flac</span><span class="tr-arr">→</span><span class="tr-new">02 - Hail to the King.flac</span><span class="tr-score s-hi">100%</span></div>
-              <div class="tr-row"><span class="tr-n">3</span><span class="tr-old">03 Doing Time.flac</span><span class="tr-arr">→</span><span class="tr-new">03 - Doing Time.flac</span><span class="tr-score s-hi">100%</span></div>
-              <div class="tr-row"><span class="tr-n">4</span><span class="tr-old">track04.flac</span><span class="tr-arr">→</span><span class="tr-new">04 - This Means War.flac</span><span class="tr-score s-md">78%</span></div>
-              <div class="tr-row"><span class="tr-n">5</span><span class="tr-old">05 Requiem.flac</span><span class="tr-arr">→</span><span class="tr-new">05 - Requiem.flac</span><span class="tr-score s-hi">100%</span></div>
-              <div class="tr-row"><span class="tr-n">6</span><span class="tr-old">06 Crimson Day.flac</span><span class="tr-arr">→</span><span class="tr-new">06 - Crimson Day.flac</span><span class="tr-score s-hi">100%</span></div>
-              <div class="tr-row"><span class="tr-n">7</span><span class="tr-old">07 Heretic.flac</span><span class="tr-arr">→</span><span class="tr-new">07 - Heretic.flac</span><span class="tr-score s-hi">100%</span></div>
-              <div class="tr-row"><span class="tr-n">8</span><span class="tr-old">Coming Home.flac</span><span class="tr-arr">→</span><span class="tr-new">08 - Coming Home.flac</span><span class="tr-score s-hi">95%</span></div>
+            <div class="wc-tabs">
+              <div class="wc-tab on" id="mk-tab-preview" onclick="mockTab('preview')">Preview</div>
+              <div class="wc-tab"    id="mk-tab-log"     onclick="mockTab('log')">Log</div>
+            </div>
+            <div class="wc-body" id="mk-preview">
+              <div class="prev-hdr" id="mk-prev-hdr">11 matched · 0 unmatched · 11 total</div>
+              <div id="mk-tracks"></div>
+            </div>
+            <div class="wc-body" id="mk-log" style="display:none;font-family:monospace;font-size:.72rem;color:var(--fg2);">
+              <div id="mk-log-lines"></div>
             </div>
           </div>
 
           <div class="wap">
-            <div class="wap-art">🎵</div>
+            <div class="wap-art" id="mk-art">🎵</div>
             <div class="wap-meta">
-              <div class="wap-row"><span class="wap-lbl">Artist</span><span class="wap-val">Avenged Sevenfold</span></div>
-              <div class="wap-row"><span class="wap-lbl">Album</span><span class="wap-val">Hail to the King</span></div>
-              <div class="wap-row"><span class="wap-lbl">Year</span><span class="wap-val">2013</span></div>
-              <div class="wap-row"><span class="wap-lbl">Genre</span><span class="wap-val">Metal</span></div>
+              <div class="wap-row"><span class="wap-lbl">Artist</span><span class="wap-val" id="mk-meta-artist">Avenged Sevenfold</span></div>
+              <div class="wap-row"><span class="wap-lbl">Album</span><span class="wap-val"  id="mk-meta-album">Hail to the King</span></div>
+              <div class="wap-row"><span class="wap-lbl">Year</span><span class="wap-val"   id="mk-meta-year">2013</span></div>
+              <div class="wap-row"><span class="wap-lbl">Genre</span><span class="wap-val"  id="mk-meta-genre">Metal</span></div>
             </div>
             <div class="wap-chips"><div class="wap-chip">Art</div><div class="wap-chip">Tags</div><div class="wap-chip">Genre</div></div>
-            <div class="wap-fetch">Fetch Artwork</div>
+            <div class="wap-fetch" id="mk-fetch" onclick="mockFetch()" style="cursor:pointer;">Fetch Artwork</div>
           </div>
 
         </div>
 
         <div class="win-footer">
-          <span>11 / 11 tracks matched</span>
+          <span id="mk-footer-txt">11 / 11 tracks matched</span>
           <div class="wf-btns">
             <div class="wf-btn">Convert</div>
-            <div class="wf-exec">Execute Rename + Tag</div>
+            <div class="wf-exec" id="mk-exec" onclick="mockExecute()" style="cursor:pointer;">Execute Rename + Tag</div>
             <div class="wf-btn">Refresh</div>
-            <div class="wf-btn">Undo</div>
+            <div class="wf-btn" id="mk-undo" onclick="mockUndo()" style="cursor:pointer;">Undo</div>
           </div>
         </div>
 
@@ -1143,16 +1142,16 @@ cmake --build build -j$(nproc)
 </footer>
 
 <script>
-// Nav scroll
+// ── Nav scroll ────────────────────────────────────────────────────────────────
 window.addEventListener('scroll', () => {
   document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 20);
 });
 
-// Mobile menu
+// ── Mobile menu ───────────────────────────────────────────────────────────────
 function toggleMenu() { document.getElementById('mobileMenu').classList.toggle('open'); }
 function closeMenu()  { document.getElementById('mobileMenu').classList.remove('open'); }
 
-// Install tabs
+// ── Install tabs ──────────────────────────────────────────────────────────────
 function switchTab(id) {
   document.querySelectorAll('.itab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.itab-panel').forEach(p => p.classList.remove('active'));
@@ -1160,17 +1159,16 @@ function switchTab(id) {
   document.getElementById('tab-' + id).classList.add('active');
 }
 
-// Copy buttons
+// ── Copy buttons ──────────────────────────────────────────────────────────────
 function copyCode(btn) {
   const text = btn.parentElement.querySelector('pre').textContent;
   navigator.clipboard.writeText(text).then(() => {
-    btn.textContent = 'Copied!';
-    btn.classList.add('copied');
+    btn.textContent = 'Copied!'; btn.classList.add('copied');
     setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
   });
 }
 
-// FAQ
+// ── FAQ ───────────────────────────────────────────────────────────────────────
 function toggleFaq(btn) {
   const ans = btn.nextElementSibling;
   const open = ans.classList.contains('open');
@@ -1179,11 +1177,278 @@ function toggleFaq(btn) {
   if (!open) { ans.classList.add('open'); btn.classList.add('open'); }
 }
 
-// Scroll reveal
+// ── Scroll reveal ─────────────────────────────────────────────────────────────
 const observer = new IntersectionObserver(entries => {
   entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
 }, { threshold: 0.1 });
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ── Interactive mockup ────────────────────────────────────────────────────────
+
+const RELEASES = {
+  stt: {
+    title: 'Sounding the Seventh Trumpet', year: '2001', genre: 'Metalcore',
+    grad: 'linear-gradient(135deg,#1a0a2e 0%,#2e0a4e 60%,#0f051a 100%)',
+    tracks: [
+      {n:1, old:'01 Turn the Other Way.mp3',   nw:'01 - Turn the Other Way.mp3',   s:'s-hi', p:'100%'},
+      {n:2, old:'02 Warmness on the Soul.mp3', nw:'02 - Warmness on the Soul.mp3', s:'s-hi', p:'100%'},
+      {n:3, old:'track03.mp3',                 nw:'03 - And All Things Will End.mp3',s:'s-md',p:'82%'},
+      {n:4, old:'04 We Come Out at Night.mp3', nw:'04 - We Come Out at Night.mp3', s:'s-hi', p:'100%'},
+      {n:5, old:'05 Lips of Deceit.mp3',       nw:'05 - Lips of Deceit.mp3',       s:'s-hi', p:'100%'},
+      {n:6, old:'06 I Wont See You Tonight.mp3',nw:'06 - I Won\'t See You Tonight Pt 1.mp3',s:'s-md',p:'76%'},
+    ]
+  },
+  wtf: {
+    title: 'Waking the Fallen', year: '2003', genre: 'Metalcore',
+    grad: 'linear-gradient(135deg,#0a1a2e 0%,#102040 60%,#050f1a 100%)',
+    tracks: [
+      {n:1, old:'01 Waking the Fallen.flac',   nw:'01 - Waking the Fallen.flac',   s:'s-hi', p:'100%'},
+      {n:2, old:'02 Unholy Confessions.flac',  nw:'02 - Unholy Confessions.flac',  s:'s-hi', p:'100%'},
+      {n:3, old:'03 Chapter Four.flac',        nw:'03 - Chapter Four.flac',        s:'s-hi', p:'100%'},
+      {n:4, old:'04 Remenissions.flac',        nw:'04 - Remenissions.flac',        s:'s-hi', p:'100%'},
+      {n:5, old:'track05.flac',                nw:'05 - Desecrate Through Reverence.flac',s:'s-md',p:'71%'},
+      {n:6, old:'06 Eternal Rest.flac',        nw:'06 - Eternal Rest.flac',        s:'s-hi', p:'100%'},
+    ]
+  },
+  coe: {
+    title: 'City of Evil', year: '2005', genre: 'Heavy Metal',
+    grad: 'linear-gradient(135deg,#2e0a0a 0%,#4a1010 60%,#1a0505 100%)',
+    tracks: [
+      {n:1, old:'01 Beast and the Harlot.flac', nw:'01 - Beast and the Harlot.flac', s:'s-hi', p:'100%'},
+      {n:2, old:'02 Burn It Down.flac',         nw:'02 - Burn It Down.flac',         s:'s-hi', p:'100%'},
+      {n:3, old:'03 Bat Country.flac',          nw:'03 - Bat Country.flac',          s:'s-hi', p:'100%'},
+      {n:4, old:'04 Trashed and Scattered.flac',nw:'04 - Trashed and Scattered.flac',s:'s-hi', p:'100%'},
+      {n:5, old:'City of Evil.flac',            nw:'05 - Seize the Day.flac',        s:'s-md', p:'68%'},
+      {n:6, old:'06 Sidewinder.flac',           nw:'06 - Sidewinder.flac',           s:'s-hi', p:'100%'},
+    ]
+  },
+  nm: {
+    title: 'Nightmare', year: '2010', genre: 'Heavy Metal',
+    grad: 'linear-gradient(135deg,#0a2e0a 0%,#103a10 60%,#051a05 100%)',
+    tracks: [
+      {n:1, old:'01 Nightmare.flac',           nw:'01 - Nightmare.flac',           s:'s-hi', p:'100%'},
+      {n:2, old:'02 Welcome to the Family.flac',nw:'02 - Welcome to the Family.flac',s:'s-hi',p:'100%'},
+      {n:3, old:'03 Danger Line.flac',         nw:'03 - Danger Line.flac',         s:'s-hi', p:'100%'},
+      {n:4, old:'track04.flac',                nw:'04 - Buried Alive.flac',        s:'s-md', p:'74%'},
+      {n:5, old:'05 Natural Born Killer.flac', nw:'05 - Natural Born Killer.flac', s:'s-hi', p:'100%'},
+      {n:6, old:'06 So Far Away.flac',         nw:'06 - So Far Away.flac',         s:'s-hi', p:'100%'},
+    ]
+  },
+  httk: {
+    title: 'Hail to the King', year: '2013', genre: 'Metal',
+    grad: 'linear-gradient(135deg,#1a1a2e 0%,#12122a 40%,#0f1520 100%)',
+    tracks: [
+      {n:1, old:'01 Shepherd of Fire.flac',   nw:'01 - Shepherd of Fire.flac',   s:'s-hi', p:'100%'},
+      {n:2, old:'02 Hail to the King.flac',   nw:'02 - Hail to the King.flac',   s:'s-hi', p:'100%'},
+      {n:3, old:'03 Doing Time.flac',         nw:'03 - Doing Time.flac',         s:'s-hi', p:'100%'},
+      {n:4, old:'track04.flac',               nw:'04 - This Means War.flac',     s:'s-md', p:'78%'},
+      {n:5, old:'05 Requiem.flac',            nw:'05 - Requiem.flac',            s:'s-hi', p:'100%'},
+      {n:6, old:'06 Crimson Day.flac',        nw:'06 - Crimson Day.flac',        s:'s-hi', p:'100%'},
+      {n:7, old:'07 Heretic.flac',            nw:'07 - Heretic.flac',            s:'s-hi', p:'100%'},
+      {n:8, old:'Coming Home.flac',           nw:'08 - Coming Home.flac',        s:'s-hi', p:'95%'},
+    ]
+  },
+  ts: {
+    title: 'The Stage', year: '2016', genre: 'Progressive Metal',
+    grad: 'linear-gradient(135deg,#1a0a1a 0%,#2e103a 60%,#0f051a 100%)',
+    tracks: [
+      {n:1, old:'01 The Stage.flac',          nw:'01 - The Stage.flac',          s:'s-hi', p:'100%'},
+      {n:2, old:'02 Paradigm.flac',           nw:'02 - Paradigm.flac',           s:'s-hi', p:'100%'},
+      {n:3, old:'03 Sunny Disposition.flac',  nw:'03 - Sunny Disposition.flac',  s:'s-hi', p:'100%'},
+      {n:4, old:'04 God Damn.flac',           nw:'04 - God Damn.flac',           s:'s-hi', p:'100%'},
+      {n:5, old:'track05.flac',               nw:'05 - Creating God.flac',       s:'s-md', p:'69%'},
+      {n:6, old:'Exist.flac',                 nw:'06 - Exist.flac',              s:'s-md', p:'88%'},
+    ]
+  },
+  libad: {
+    title: 'Life Is But a Dream...', year: '2023', genre: 'Progressive Metal',
+    grad: 'linear-gradient(135deg,#0a1a1a 0%,#103030 60%,#051212 100%)',
+    tracks: [
+      {n:1, old:'01 Game Over.flac',          nw:'01 - Game Over.flac',          s:'s-hi', p:'100%'},
+      {n:2, old:'02 Mattel.flac',             nw:'02 - Mattel.flac',             s:'s-hi', p:'100%'},
+      {n:3, old:'03 Nobody.flac',             nw:'03 - Nobody.flac',             s:'s-hi', p:'100%'},
+      {n:4, old:'track04.flac',               nw:'04 - We Love You.flac',        s:'s-md', p:'72%'},
+      {n:5, old:'05 Cosmic.flac',             nw:'05 - Cosmic.flac',             s:'s-hi', p:'100%'},
+      {n:6, old:'Beautiful Morning.flac',     nw:'06 - Beautiful Morning.flac',  s:'s-hi', p:'92%'},
+    ]
+  }
+};
+
+let currentRelease = 'httk';
+let executed = false;
+let currentMockTab = 'preview';
+
+function renderTracks(id, done) {
+  const rel = RELEASES[id];
+  const container = document.getElementById('mk-tracks');
+  container.innerHTML = rel.tracks.map(t => {
+    if (done) {
+      return `<div class="tr-row" style="opacity:0;animation:fadeIn .3s ease forwards;animation-delay:${t.n * 60}ms">
+        <span class="tr-n">${t.n}</span>
+        <span class="tr-old" style="text-decoration:line-through;color:var(--fg3)">${t.old}</span>
+        <span class="tr-arr" style="color:var(--green)">✓</span>
+        <span class="tr-new" style="color:var(--green)">${t.nw}</span>
+        <span class="tr-score" style="background:rgba(61,220,132,.15);color:var(--green)">Done</span>
+      </div>`;
+    }
+    return `<div class="tr-row">
+      <span class="tr-n">${t.n}</span>
+      <span class="tr-old">${t.old}</span>
+      <span class="tr-arr">→</span>
+      <span class="tr-new">${t.nw}</span>
+      <span class="tr-score ${t.s}">${t.p}</span>
+    </div>`;
+  }).join('');
+}
+
+function renderLog(id) {
+  const rel = RELEASES[id];
+  const now = new Date();
+  const ts = t => { const d = new Date(now - t); return d.toTimeString().slice(0,8); };
+  const lines = [
+    `<div style="color:var(--accent)">[${ts(5000)}] Searching Spotify: "Avenged Sevenfold"</div>`,
+    `<div style="color:var(--green)">[${ts(4200)}] Artist matched: Avenged Sevenfold (score 100)</div>`,
+    `<div style="color:var(--accent)">[${ts(3800)}] Fetching releases…</div>`,
+    `<div>[${ts(3100)}] Found 34 releases</div>`,
+    `<div style="color:var(--accent)">[${ts(2600)}] Loading "${rel.title}" tracks…</div>`,
+    `<div style="color:var(--green)">[${ts(2000)}] Got ${rel.tracks.length} tracks from Spotify API</div>`,
+    `<div style="color:var(--accent)">[${ts(1400)}] Fetching cover art…</div>`,
+    `<div style="color:var(--green)">[${ts(900)}]  Cover art downloaded (640×640)</div>`,
+    `<div>[${ts(600)}]  Running fuzzy match on ${rel.tracks.length} local files…</div>`,
+    `<div style="color:var(--green)">[${ts(200)}]  Matched ${rel.tracks.filter(t=>t.s==='s-hi').length}/${rel.tracks.length} files with high confidence</div>`,
+  ];
+  document.getElementById('mk-log-lines').innerHTML = lines.join('');
+}
+
+function mockSelect(id, el) {
+  if (id === currentRelease && !executed) return;
+  executed = false;
+  currentRelease = id;
+  const rel = RELEASES[id];
+
+  // Sidebar highlight
+  document.querySelectorAll('#mk-sidebar .rel-row').forEach(r => r.classList.remove('sel'));
+  el.classList.add('sel');
+
+  // Status bar — brief loading flash
+  const albumDot = document.getElementById('mk-status-album');
+  albumDot.style.color = 'var(--accent)';
+  albumDot.textContent = `Loading ${rel.title}…`;
+  setTimeout(() => {
+    albumDot.style.color = 'var(--green)';
+    albumDot.textContent = `✓ ${rel.title} (${rel.year})`;
+  }, 600);
+
+  document.getElementById('mk-status-match').textContent   = `${rel.tracks.length} / ${rel.tracks.length} matched`;
+  document.getElementById('mk-status-missing').textContent = '0 missing';
+
+  // Art panel
+  const art = document.getElementById('mk-art');
+  art.style.transition = 'opacity .25s';
+  art.style.opacity = '0';
+  setTimeout(() => {
+    art.style.background = rel.grad;
+    art.style.opacity = '1';
+  }, 250);
+
+  // Metadata
+  document.getElementById('mk-meta-album').textContent  = rel.title;
+  document.getElementById('mk-meta-year').textContent   = rel.year;
+  document.getElementById('mk-meta-genre').textContent  = rel.genre;
+
+  // Preview header
+  const hi = rel.tracks.filter(t => t.s === 's-hi').length;
+  const lo = rel.tracks.length - hi;
+  document.getElementById('mk-prev-hdr').textContent =
+    `${hi} matched · ${lo > 0 ? lo + ' low-confidence' : '0 unmatched'} · ${rel.tracks.length} total`;
+
+  // Tracks
+  renderTracks(id, false);
+  renderLog(id);
+
+  // Footer
+  document.getElementById('mk-footer-txt').textContent = `${rel.tracks.length} / ${rel.tracks.length} tracks matched`;
+  const exec = document.getElementById('mk-exec');
+  exec.textContent = 'Execute Rename + Tag';
+  exec.style.background = '';
+}
+
+function mockTab(tab) {
+  currentMockTab = tab;
+  document.getElementById('mk-tab-preview').classList.toggle('on', tab === 'preview');
+  document.getElementById('mk-tab-log').classList.toggle('on', tab === 'log');
+  document.getElementById('mk-preview').style.display = tab === 'preview' ? 'block' : 'none';
+  document.getElementById('mk-log').style.display     = tab === 'log'     ? 'block' : 'none';
+  if (tab === 'log') renderLog(currentRelease);
+}
+
+function mockExecute() {
+  if (executed) return;
+  executed = true;
+  const rel = RELEASES[currentRelease];
+  const exec = document.getElementById('mk-exec');
+
+  // Animate button
+  exec.textContent = 'Working…';
+  exec.style.background = 'var(--amber)';
+
+  setTimeout(() => {
+    renderTracks(currentRelease, true);
+    exec.textContent = '✓ Done!';
+    exec.style.background = 'var(--green)';
+    exec.style.color = '#000';
+    document.getElementById('mk-footer-txt').textContent =
+      `✓ ${rel.tracks.length} files renamed · Tags written · Art embedded`;
+    document.getElementById('mk-status-match').style.color = 'var(--green)';
+    document.getElementById('mk-status-match').textContent = `${rel.tracks.length} / ${rel.tracks.length} tagged`;
+
+    // Add log entries
+    renderLog(currentRelease);
+    const logLines = document.getElementById('mk-log-lines');
+    const ts = new Date().toTimeString().slice(0,8);
+    logLines.innerHTML += `<div style="color:var(--green);margin-top:.4rem">[${ts}] ✓ Renamed ${rel.tracks.length} files</div>`;
+    logLines.innerHTML += `<div style="color:var(--green)">[${ts}] ✓ Tags written to all files</div>`;
+    logLines.innerHTML += `<div style="color:var(--green)">[${ts}] ✓ Cover art embedded</div>`;
+  }, 800);
+}
+
+function mockUndo() {
+  if (!executed) return;
+  executed = false;
+  const rel = RELEASES[currentRelease];
+  renderTracks(currentRelease, false);
+  const exec = document.getElementById('mk-exec');
+  exec.textContent = 'Execute Rename + Tag';
+  exec.style.background = '';
+  exec.style.color = '';
+  document.getElementById('mk-footer-txt').textContent = `${rel.tracks.length} / ${rel.tracks.length} tracks matched`;
+  document.getElementById('mk-status-match').style.color = 'var(--accent)';
+  document.getElementById('mk-status-match').textContent = `${rel.tracks.length} / ${rel.tracks.length} matched`;
+}
+
+function mockFetch() {
+  const art = document.getElementById('mk-art');
+  const fetch = document.getElementById('mk-fetch');
+  fetch.textContent = 'Fetching…';
+  art.style.transition = 'opacity .2s';
+  art.style.opacity = '0.3';
+  setTimeout(() => {
+    art.style.opacity = '1';
+    fetch.textContent = '✓ Art updated';
+    setTimeout(() => { fetch.textContent = 'Fetch Artwork'; }, 1500);
+  }, 900);
+}
+
+// Init mockup on load
+document.addEventListener('DOMContentLoaded', () => {
+  renderTracks('httk', false);
+  renderLog('httk');
+});
+
+// Fade-in keyframe for execute animation
+const style = document.createElement('style');
+style.textContent = '@keyframes fadeIn { from { opacity:0; transform:translateX(-6px) } to { opacity:1; transform:none } }';
+document.head.appendChild(style);
 </script>
 
 </body>
