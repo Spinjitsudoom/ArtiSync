@@ -3,837 +3,1188 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Music Manager Ultimate — organise your music library with Spotify metadata, fuzzy file matching, tag writing, cover art, and audio conversion.">
 <title>Music Manager Ultimate</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* ── Reset & base ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
 
-  :root {
-    --bg: #0e0e0e;
-    --surface: #161616;
-    --surface2: #1e1e1e;
-    --surface3: #252525;
-    --border: #2e2e2e;
-    --accent: #0078d4;
-    --accent-hover: #1a8fe0;
-    --fg: #e0e0e0;
-    --fg-muted: #888;
-    --fg-dim: #444;
-    --green: #2ecc71;
-    --amber: #f39c12;
-    --red: #e74c3c;
-  }
+:root {
+  --bg:        #0a0a0f;
+  --bg2:       #0f0f18;
+  --surface:   #13131e;
+  --surface2:  #1a1a28;
+  --surface3:  #222235;
+  --border:    #252538;
+  --border2:   #2e2e48;
+  --accent:    #5b8dee;
+  --accent2:   #7c6ff7;
+  --accent-g:  linear-gradient(135deg, #5b8dee, #7c6ff7);
+  --green:     #3ddc84;
+  --amber:     #f5a623;
+  --red:       #ff5f57;
+  --fg:        #e8e8f0;
+  --fg2:       #9898b8;
+  --fg3:       #55556a;
+  --radius:    10px;
+  --radius-lg: 16px;
+  --shadow:    0 8px 32px rgba(0,0,0,.5);
+  --shadow-lg: 0 24px 80px rgba(0,0,0,.6);
+}
 
-  body {
-    background: var(--bg);
-    color: var(--fg);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    line-height: 1.6;
-  }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
 
-  /* ── Nav ── */
-  nav {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 56px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .nav-brand { display: flex; align-items: center; gap: .6rem; font-weight: 700; font-size: 1.05rem; }
-  .nav-brand .icon {
-    width: 32px; height: 32px; border-radius: 6px;
-    background: var(--accent);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1rem;
-  }
-  .nav-links { display: flex; gap: 1.5rem; }
-  .nav-links a { color: var(--fg-muted); text-decoration: none; font-size: .9rem; transition: color .2s; }
-  .nav-links a:hover { color: var(--fg); }
+/* ── Utility ──────────────────────────────────────────────────────────────── */
+.container { max-width: 1140px; margin: 0 auto; padding: 0 1.5rem; }
+.section    { padding: 6rem 0; }
+.section-sm { padding: 4rem 0; }
 
-  /* ── Hero ── */
-  .hero {
-    text-align: center;
-    padding: 5rem 2rem 3rem;
-    max-width: 860px;
-    margin: 0 auto;
-  }
-  .hero h1 { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 800; letter-spacing: -.02em; margin-bottom: .75rem; }
-  .hero h1 span { color: var(--accent); }
-  .hero p { color: var(--fg-muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto 2rem; }
-  .hero-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
-  .btn {
-    display: inline-flex; align-items: center; gap: .5rem;
-    padding: .65rem 1.4rem; border-radius: 8px; font-weight: 600;
-    font-size: .95rem; text-decoration: none; transition: .2s;
-  }
-  .btn-primary { background: var(--accent); color: #fff; }
-  .btn-primary:hover { background: var(--accent-hover); }
-  .btn-secondary { background: var(--surface2); color: var(--fg); border: 1px solid var(--border); }
-  .btn-secondary:hover { background: var(--surface3); }
+.tag {
+  display: inline-flex; align-items: center; gap: .4rem;
+  background: rgba(91,141,238,.12);
+  color: var(--accent);
+  border: 1px solid rgba(91,141,238,.25);
+  border-radius: 20px;
+  padding: .2rem .85rem;
+  font-size: .78rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
 
-  /* ── Section ── */
-  section { max-width: 1100px; margin: 0 auto; padding: 4rem 2rem; }
-  section h2 { font-size: 1.7rem; font-weight: 700; margin-bottom: 2rem; text-align: center; }
-  section h2 span { color: var(--accent); }
+h1, h2, h3, h4 { line-height: 1.2; }
+h2.section-title {
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  font-weight: 800;
+  margin-bottom: .75rem;
+}
+h2.section-title span { background: var(--accent-g); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.section-sub { color: var(--fg2); font-size: 1.05rem; max-width: 560px; margin-bottom: 3rem; }
 
-  /* ── App Mockup ── */
-  .mockup-wrap {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 24px 80px rgba(0,0,0,.6);
-    max-width: 960px;
-    margin: 0 auto;
-  }
-  .titlebar {
-    background: #1a1a1a;
-    border-bottom: 1px solid var(--border);
-    padding: .5rem 1rem;
-    display: flex;
-    align-items: center;
-    gap: .75rem;
-  }
-  .titlebar .dots { display: flex; gap: .4rem; }
-  .titlebar .dot { width: 12px; height: 12px; border-radius: 50%; }
-  .dot-r { background: #e74c3c; }
-  .dot-y { background: #f39c12; }
-  .dot-g { background: #27ae60; }
-  .titlebar-title { color: var(--fg-muted); font-size: .85rem; margin-left: .5rem; }
-  .titlebar-menu { color: var(--fg-muted); font-size: .8rem; margin-left: 1rem; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
 
-  .app-toolbar {
-    background: var(--surface2);
-    border-bottom: 1px solid var(--border);
-    padding: .5rem 1rem;
-    display: flex;
-    align-items: center;
-    gap: .6rem;
-    flex-wrap: wrap;
-  }
-  .tb-btn {
-    background: var(--surface3);
-    border: 1px solid var(--border);
-    color: var(--fg);
-    padding: .3rem .8rem;
-    border-radius: 5px;
-    font-size: .78rem;
-    cursor: default;
-  }
-  .tb-input {
-    flex: 1; min-width: 160px;
-    background: var(--surface3);
-    border: 1px solid var(--border);
-    color: var(--fg-muted);
-    padding: .3rem .7rem;
-    border-radius: 5px;
-    font-size: .78rem;
-  }
-  .tb-select {
-    background: var(--surface3);
-    border: 1px solid var(--border);
-    color: var(--fg);
-    padding: .3rem .6rem;
-    border-radius: 5px;
-    font-size: .78rem;
-    width: 130px;
-  }
+code {
+  background: var(--surface3);
+  border: 1px solid var(--border2);
+  border-radius: 5px;
+  padding: .1rem .4rem;
+  font-family: "SF Mono", "Fira Code", monospace;
+  font-size: .85em;
+  color: #c8c8e8;
+}
 
-  .status-bar {
-    background: var(--surface2);
-    border-bottom: 1px solid var(--border);
-    padding: .3rem 1rem;
-    display: flex;
-    gap: 1.2rem;
-    font-size: .74rem;
-    color: var(--fg-muted);
-    align-items: center;
-  }
-  .status-dot { display: flex; align-items: center; gap: .35rem; }
-  .dot-green { color: var(--green); }
-  .dot-blue { color: var(--accent); }
+/* ── Buttons ──────────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  padding: .7rem 1.6rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: .95rem;
+  cursor: pointer;
+  transition: all .2s;
+  text-decoration: none;
+  border: none;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--accent-g);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(91,141,238,.35);
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(91,141,238,.5); text-decoration: none; }
+.btn-secondary {
+  background: var(--surface2);
+  color: var(--fg);
+  border: 1px solid var(--border2);
+}
+.btn-secondary:hover { background: var(--surface3); text-decoration: none; }
+.btn-sm { padding: .45rem 1rem; font-size: .85rem; }
 
-  .app-body {
-    display: flex;
-    height: 440px;
-  }
+/* ── Nav ──────────────────────────────────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  height: 60px;
+  display: flex; align-items: center;
+  transition: background .3s, backdrop-filter .3s, border-color .3s;
+}
+nav.scrolled {
+  background: rgba(10,10,15,.85);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+.nav-inner {
+  max-width: 1140px; margin: 0 auto; padding: 0 1.5rem;
+  width: 100%;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-brand {
+  display: flex; align-items: center; gap: .6rem;
+  font-weight: 700; font-size: 1rem;
+  color: var(--fg); text-decoration: none;
+}
+.nav-logo {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--accent-g);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+}
+.nav-links { display: flex; align-items: center; gap: 1.75rem; }
+.nav-links a {
+  color: var(--fg2); font-size: .9rem; transition: color .2s; text-decoration: none;
+}
+.nav-links a:hover { color: var(--fg); }
+.nav-cta { display: flex; gap: .75rem; }
 
-  /* Sidebar */
-  .sidebar {
-    width: 220px;
-    min-width: 220px;
-    background: var(--surface2);
-    border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-  }
-  .sidebar-hdr {
-    background: #2a2a2a;
-    color: #999;
-    font-size: .72rem;
-    font-weight: 700;
-    letter-spacing: .06em;
-    padding: .5rem .75rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .sidebar-badge {
-    background: var(--accent);
-    color: #fff;
-    font-size: .68rem;
-    padding: .05rem .35rem;
-    border-radius: 10px;
-  }
-  .sidebar-list { overflow-y: auto; flex: 1; }
-  .release-row {
-    display: flex;
-    align-items: center;
-    gap: .6rem;
-    padding: .45rem .6rem;
-    border-bottom: 1px solid #1a1a1a;
-    cursor: default;
-    transition: background .15s;
-  }
-  .release-row:hover { background: #252525; }
-  .release-row.selected { background: #0d2a45; border-left: 3px solid var(--accent); }
-  .thumb {
-    width: 44px; height: 44px;
-    border-radius: 4px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: .9rem;
-    color: #333;
-  }
-  .release-info { overflow: hidden; }
-  .release-title { font-size: .8rem; font-weight: 600; color: var(--fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .release-meta { font-size: .7rem; color: #666; }
-  .release-count { margin-left: auto; font-size: .7rem; color: #555; flex-shrink: 0; }
+.hamburger {
+  display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px;
+}
+.hamburger span { display: block; width: 22px; height: 2px; background: var(--fg2); border-radius: 2px; transition: .3s; }
 
-  /* Centre */
-  .centre {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-  .tabs {
-    display: flex;
-    border-bottom: 1px solid var(--border);
-    background: var(--surface2);
-  }
-  .tab {
-    padding: .5rem 1.1rem;
-    font-size: .82rem;
-    color: var(--fg-muted);
-    border-bottom: 2px solid transparent;
-    cursor: default;
-  }
-  .tab.active { color: var(--fg); border-bottom-color: var(--accent); }
+.mobile-menu {
+  display: none; position: fixed; top: 60px; left: 0; right: 0;
+  background: rgba(10,10,15,.97); backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 1.5rem;
+  flex-direction: column; gap: 1rem; z-index: 199;
+}
+.mobile-menu a { color: var(--fg2); font-size: 1rem; padding: .4rem 0; text-decoration: none; }
+.mobile-menu.open { display: flex; }
 
-  .preview-area { flex: 1; overflow-y: auto; padding: .5rem; }
-  .preview-hdr {
-    font-size: .74rem;
-    color: #666;
-    padding: .3rem .5rem .5rem;
-  }
-  .track-row {
-    display: flex;
-    align-items: center;
-    gap: .6rem;
-    padding: .35rem .5rem;
-    border-radius: 5px;
-    margin-bottom: 2px;
-    font-size: .76rem;
-  }
-  .track-row:nth-child(odd) { background: #1a1a1a; }
-  .track-num { color: #555; width: 18px; text-align: right; flex-shrink: 0; }
-  .track-name { flex: 1; color: #bbb; }
-  .arrow { color: #444; flex-shrink: 0; }
-  .track-new { flex: 1; color: var(--fg); }
-  .score { font-size: .7rem; padding: .1rem .4rem; border-radius: 4px; flex-shrink: 0; }
-  .score-high { background: #1a3a25; color: var(--green); }
-  .score-mid  { background: #3a2e10; color: var(--amber); }
+/* ── Hero ─────────────────────────────────────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center;
+  padding: 7rem 1.5rem 4rem;
+  position: relative;
+  overflow: hidden;
+}
 
-  /* Art panel */
-  .art-panel {
-    width: 190px;
-    min-width: 190px;
-    background: var(--surface2);
-    border-left: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: .75rem;
-    gap: .5rem;
-  }
-  .art-img {
-    width: 160px; height: 160px;
-    border-radius: 6px;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 2.5rem;
-    position: relative;
-    overflow: hidden;
-  }
-  .art-img::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: repeating-linear-gradient(
-      45deg,
-      transparent, transparent 12px,
-      rgba(255,255,255,.015) 12px, rgba(255,255,255,.015) 13px
-    );
-  }
-  .meta-grid { width: 100%; }
-  .meta-row { display: flex; justify-content: space-between; font-size: .72rem; padding: .15rem 0; border-bottom: 1px solid #222; }
-  .meta-label { color: #555; }
-  .meta-val { color: var(--fg-muted); text-align: right; max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .chips { display: flex; gap: .3rem; width: 100%; }
-  .chip {
-    flex: 1; text-align: center;
-    background: var(--accent);
-    color: #fff;
-    font-size: .7rem;
-    padding: .2rem 0;
-    border-radius: 4px;
-  }
-  .fetch-btn {
-    width: 100%;
-    background: var(--surface3);
-    border: 1px solid var(--border);
-    color: var(--fg-muted);
-    font-size: .75rem;
-    padding: .3rem;
-    border-radius: 5px;
-    text-align: center;
-    cursor: default;
-  }
+.hero-glow {
+  position: absolute; border-radius: 50%; filter: blur(100px); pointer-events: none; z-index: 0;
+}
+.hero-glow-1 { width: 600px; height: 600px; background: rgba(91,141,238,.08); top: -100px; left: 50%; transform: translateX(-50%); }
+.hero-glow-2 { width: 400px; height: 400px; background: rgba(124,111,247,.06); bottom: 0; right: -100px; }
+.hero-glow-3 { width: 350px; height: 350px; background: rgba(61,220,132,.05); bottom: 50px; left: -80px; }
 
-  /* Footer */
-  .app-footer {
-    background: var(--surface2);
-    border-top: 1px solid var(--border);
-    padding: .4rem 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: .74rem;
-    color: var(--fg-muted);
-  }
-  .footer-btns { display: flex; gap: .4rem; }
-  .foot-btn {
-    background: var(--surface3);
-    border: 1px solid var(--border);
-    color: var(--fg);
-    padding: .25rem .7rem;
-    border-radius: 4px;
-    font-size: .74rem;
-    cursor: default;
-  }
-  .foot-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.hero-content { position: relative; z-index: 1; max-width: 780px; }
+.hero h1 {
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  font-weight: 900;
+  letter-spacing: -.03em;
+  margin-bottom: 1.25rem;
+}
+.hero h1 .grad { background: var(--accent-g); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero p { color: var(--fg2); font-size: clamp(1rem, 2vw, 1.2rem); max-width: 580px; margin: 0 auto 2.5rem; }
+.hero-btns { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
 
-  /* ── Feature grid ── */
-  .features {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.25rem;
-  }
-  .feature-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 1.4rem;
-    transition: border-color .2s;
-  }
-  .feature-card:hover { border-color: #444; }
-  .feature-icon { font-size: 1.6rem; margin-bottom: .75rem; }
-  .feature-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: .4rem; }
-  .feature-card p { font-size: .875rem; color: var(--fg-muted); line-height: 1.55; }
+.hero-badges {
+  margin-top: 3.5rem;
+  display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap;
+}
+.hero-badge {
+  display: flex; align-items: center; gap: .5rem;
+  color: var(--fg3); font-size: .82rem;
+}
+.hero-badge span { color: var(--fg2); }
 
-  /* ── Workflow ── */
-  .steps {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-    max-width: 680px;
-    margin: 0 auto;
-  }
-  .step {
-    display: flex;
-    gap: 1.25rem;
-    align-items: flex-start;
-    position: relative;
-    padding-bottom: 1.75rem;
-  }
-  .step:last-child { padding-bottom: 0; }
-  .step:not(:last-child)::before {
-    content: '';
-    position: absolute;
-    left: 19px;
-    top: 40px;
-    bottom: 0;
-    width: 2px;
-    background: var(--border);
-  }
-  .step-num {
-    width: 40px; height: 40px;
-    border-radius: 50%;
-    background: var(--accent);
-    color: #fff;
-    font-weight: 700;
-    font-size: .9rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    position: relative;
-    z-index: 1;
-  }
-  .step-body h3 { font-size: 1rem; font-weight: 700; margin-bottom: .25rem; margin-top: .55rem; }
-  .step-body p { font-size: .875rem; color: var(--fg-muted); }
+/* ── App mockup ───────────────────────────────────────────────────────────── */
+.mockup-section { padding: 2rem 0 6rem; }
+.mockup-outer {
+  position: relative;
+  max-width: 1060px;
+  margin: 0 auto;
+}
+.mockup-outer::before {
+  content: '';
+  position: absolute; inset: -1px;
+  border-radius: calc(var(--radius-lg) + 1px);
+  background: linear-gradient(135deg, rgba(91,141,238,.3), rgba(124,111,247,.15), transparent 60%);
+  z-index: 0;
+}
+.mockup-window {
+  position: relative; z-index: 1;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+.win-bar {
+  background: #111120;
+  padding: .55rem 1rem;
+  display: flex; align-items: center; gap: .75rem;
+  border-bottom: 1px solid var(--border);
+}
+.win-dots { display: flex; gap: 6px; }
+.wd { width: 12px; height: 12px; border-radius: 50%; }
+.wd-r { background: #ff5f57; } .wd-y { background: #ffbd2e; } .wd-g { background: #28c941; }
+.win-title { color: var(--fg3); font-size: .82rem; margin-left: .5rem; }
+.win-menu { color: var(--fg3); font-size: .8rem; margin-left: 1rem; }
 
-  /* ── Download cards ── */
-  .dl-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 1.25rem;
-    max-width: 700px;
-    margin: 0 auto;
-  }
-  .dl-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 1.6rem;
-    text-align: center;
-  }
-  .dl-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: .35rem; }
-  .dl-card p { font-size: .83rem; color: var(--fg-muted); margin-bottom: 1.1rem; }
-  .dl-card pre {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: .6rem;
-    font-size: .75rem;
-    color: #aaa;
-    text-align: left;
-    margin-bottom: 1rem;
-    overflow-x: auto;
-  }
+.win-toolbar {
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  padding: .45rem .85rem;
+  display: flex; align-items: center; gap: .5rem; flex-wrap: wrap;
+}
+.wt-btn { background: var(--surface3); border: 1px solid var(--border2); color: var(--fg2); padding: .28rem .75rem; border-radius: 5px; font-size: .76rem; }
+.wt-path { flex: 1; min-width: 160px; background: var(--surface3); border: 1px solid var(--border2); color: var(--fg3); padding: .28rem .65rem; border-radius: 5px; font-size: .76rem; }
+.wt-sel { background: var(--surface3); border: 1px solid var(--border2); color: var(--fg2); padding: .28rem .55rem; border-radius: 5px; font-size: .76rem; width: 140px; }
+.wt-batch { background: var(--accent); border: none; color: #fff; padding: .28rem .75rem; border-radius: 5px; font-size: .76rem; }
 
-  /* ── Footer ── */
-  .page-footer {
-    border-top: 1px solid var(--border);
-    text-align: center;
-    padding: 2rem;
-    color: var(--fg-dim);
-    font-size: .85rem;
-  }
-  .page-footer a { color: var(--fg-muted); }
+.win-status {
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  padding: .28rem .85rem;
+  display: flex; gap: 1.2rem;
+  font-size: .72rem; color: var(--fg3);
+  align-items: center;
+}
+.ws-dot { display: flex; align-items: center; gap: .35rem; }
 
-  @media (max-width: 700px) {
-    .app-body { height: auto; flex-direction: column; }
-    .sidebar { width: 100%; min-width: unset; height: 200px; }
-    .art-panel { width: 100%; min-width: unset; flex-direction: row; flex-wrap: wrap; }
-    .art-img { width: 100px; height: 100px; }
-  }
+.win-body { display: flex; height: 400px; }
+
+/* Sidebar */
+.wsb {
+  width: 210px; min-width: 210px;
+  background: var(--surface2);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.wsb-hdr {
+  background: #161625;
+  color: var(--fg3);
+  font-size: .7rem; font-weight: 700;
+  letter-spacing: .07em; text-transform: uppercase;
+  padding: .45rem .75rem;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.wsb-badge { background: var(--accent); color: #fff; font-size: .66rem; padding: .05rem .38rem; border-radius: 10px; }
+.wsb-list { overflow-y: auto; flex: 1; }
+.rel-row {
+  display: flex; align-items: center; gap: .5rem;
+  padding: .4rem .6rem;
+  border-bottom: 1px solid #161625;
+  cursor: default;
+}
+.rel-row.sel { background: rgba(91,141,238,.12); border-left: 2px solid var(--accent); }
+.rel-thumb {
+  width: 40px; height: 40px; border-radius: 4px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .85rem; color: var(--fg3);
+}
+.rel-info { overflow: hidden; flex: 1; }
+.rel-title { font-size: .77rem; font-weight: 600; color: var(--fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rel-meta { font-size: .68rem; color: var(--fg3); }
+.rel-n { font-size: .68rem; color: var(--fg3); flex-shrink: 0; }
+
+/* Centre */
+.wc { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.wc-tabs { display: flex; background: var(--surface2); border-bottom: 1px solid var(--border); }
+.wc-tab { padding: .45rem 1rem; font-size: .8rem; color: var(--fg3); border-bottom: 2px solid transparent; cursor: default; }
+.wc-tab.on { color: var(--fg); border-bottom-color: var(--accent); }
+.wc-body { flex: 1; overflow-y: auto; padding: .4rem; }
+.prev-hdr { font-size: .72rem; color: var(--fg3); padding: .25rem .4rem .5rem; }
+.tr-row { display: flex; align-items: center; gap: .5rem; padding: .3rem .4rem; border-radius: 4px; font-size: .74rem; }
+.tr-row:nth-child(odd) { background: rgba(255,255,255,.02); }
+.tr-n { color: var(--fg3); width: 16px; text-align: right; flex-shrink: 0; }
+.tr-old { flex: 1; color: var(--fg2); }
+.tr-arr { color: var(--fg3); flex-shrink: 0; }
+.tr-new { flex: 1; color: var(--fg); }
+.tr-score { font-size: .68rem; padding: .1rem .38rem; border-radius: 3px; flex-shrink: 0; }
+.s-hi { background: rgba(61,220,132,.12); color: var(--green); }
+.s-md { background: rgba(245,166,35,.12); color: var(--amber); }
+
+/* Art panel */
+.wap {
+  width: 180px; min-width: 180px;
+  background: var(--surface2);
+  border-left: 1px solid var(--border);
+  display: flex; flex-direction: column;
+  align-items: center; padding: .7rem .6rem; gap: .45rem;
+}
+.wap-art {
+  width: 152px; height: 152px; border-radius: 6px;
+  background: linear-gradient(135deg, #1a1a35 0%, #12122a 40%, #0f1520 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.2rem; position: relative; overflow: hidden;
+}
+.wap-art::after {
+  content: ''; position: absolute; inset: 0;
+  background: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,.018) 10px, rgba(255,255,255,.018) 11px);
+}
+.wap-meta { width: 100%; }
+.wap-row { display: flex; justify-content: space-between; font-size: .7rem; padding: .13rem 0; border-bottom: 1px solid #1c1c30; }
+.wap-lbl { color: var(--fg3); }
+.wap-val { color: var(--fg2); max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: right; }
+.wap-chips { display: flex; gap: .3rem; width: 100%; }
+.wap-chip { flex: 1; text-align: center; background: var(--accent); color: #fff; font-size: .68rem; padding: .18rem 0; border-radius: 3px; }
+.wap-fetch { width: 100%; background: var(--surface3); border: 1px solid var(--border2); color: var(--fg2); font-size: .72rem; padding: .28rem; border-radius: 4px; text-align: center; }
+
+.win-footer {
+  background: var(--surface2); border-top: 1px solid var(--border);
+  padding: .38rem .85rem;
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: .72rem; color: var(--fg3);
+}
+.wf-btns { display: flex; gap: .35rem; }
+.wf-btn { background: var(--surface3); border: 1px solid var(--border2); color: var(--fg2); padding: .22rem .65rem; border-radius: 4px; font-size: .72rem; }
+.wf-exec { background: var(--accent); border: none; color: #fff; padding: .22rem .65rem; border-radius: 4px; font-size: .72rem; }
+
+/* ── Features ─────────────────────────────────────────────────────────────── */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.25rem;
+}
+.feat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.6rem;
+  transition: border-color .25s, transform .25s;
+  position: relative;
+  overflow: hidden;
+}
+.feat-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: var(--accent-g); opacity: 0;
+  transition: opacity .25s;
+}
+.feat-card:hover { border-color: var(--border2); transform: translateY(-3px); }
+.feat-card:hover::before { opacity: .03; }
+.feat-icon {
+  width: 46px; height: 46px; border-radius: 10px;
+  background: rgba(91,141,238,.1);
+  border: 1px solid rgba(91,141,238,.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3rem; margin-bottom: 1rem;
+  position: relative;
+}
+.feat-card h3 { font-size: 1rem; font-weight: 700; margin-bottom: .4rem; }
+.feat-card p { font-size: .875rem; color: var(--fg2); line-height: 1.6; }
+
+/* ── How it works ─────────────────────────────────────────────────────────── */
+.how-bg { background: var(--bg2); }
+.steps-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem 3rem;
+  max-width: 820px;
+}
+.step-card {
+  display: flex; gap: 1rem;
+}
+.step-num {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: var(--accent-g);
+  color: #fff; font-weight: 700; font-size: .9rem;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.step-body h3 { font-size: .95rem; font-weight: 700; margin-bottom: .3rem; margin-top: .35rem; }
+.step-body p { font-size: .85rem; color: var(--fg2); }
+
+/* ── Install ──────────────────────────────────────────────────────────────── */
+.install-tabs {
+  display: flex; gap: 0;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px 10px 0 0; overflow: hidden;
+  max-width: 680px;
+}
+.itab {
+  flex: 1; padding: .75rem 1.2rem; font-size: .9rem; font-weight: 600;
+  color: var(--fg2); cursor: pointer; transition: all .2s;
+  background: transparent; border: none; border-bottom: 2px solid transparent;
+}
+.itab.active { color: var(--fg); border-bottom-color: var(--accent); background: rgba(91,141,238,.06); }
+.itab-panel {
+  display: none; max-width: 680px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-top: none; border-radius: 0 0 10px 10px; padding: 1.5rem;
+}
+.itab-panel.active { display: block; }
+.code-block {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  margin: .75rem 0;
+  position: relative;
+  overflow-x: auto;
+}
+.code-block pre { font-family: "SF Mono","Fira Code",monospace; font-size: .83rem; color: #c8c8e8; white-space: pre; }
+.copy-btn {
+  position: absolute; top: .6rem; right: .6rem;
+  background: var(--surface2); border: 1px solid var(--border2);
+  color: var(--fg2); font-size: .72rem; padding: .2rem .55rem;
+  border-radius: 4px; cursor: pointer; transition: .2s;
+}
+.copy-btn:hover { background: var(--surface3); color: var(--fg); }
+.copy-btn.copied { color: var(--green); border-color: rgba(61,220,132,.4); }
+.itab-panel p { font-size: .875rem; color: var(--fg2); margin-bottom: .5rem; }
+.itab-panel a { color: var(--accent); }
+
+/* ── Spotify setup ────────────────────────────────────────────────────────── */
+.spotify-steps {
+  display: flex; flex-direction: column; gap: 0;
+  max-width: 600px;
+}
+.spotify-step {
+  display: flex; gap: 1rem; align-items: flex-start;
+  padding-bottom: 1.5rem; position: relative;
+}
+.spotify-step:not(:last-child)::before {
+  content: ''; position: absolute; left: 17px; top: 36px; bottom: 0;
+  width: 2px; background: var(--border);
+}
+.sp-num {
+  width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+  background: rgba(91,141,238,.12); border: 1px solid rgba(91,141,238,.3);
+  color: var(--accent); font-weight: 700; font-size: .88rem;
+  display: flex; align-items: center; justify-content: center; position: relative; z-index: 1;
+}
+.sp-body { padding-top: .45rem; }
+.sp-body h3 { font-size: .95rem; font-weight: 700; margin-bottom: .25rem; }
+.sp-body p { font-size: .85rem; color: var(--fg2); }
+
+/* ── Conversion table ─────────────────────────────────────────────────────── */
+.conv-bg { background: var(--bg2); }
+.format-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+  max-width: 780px;
+}
+.format-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 1.5rem;
+}
+.format-card h3 { font-size: .9rem; font-weight: 700; color: var(--fg2); margin-bottom: 1rem; letter-spacing: .04em; text-transform: uppercase; }
+.format-pills { display: flex; flex-wrap: wrap; gap: .45rem; }
+.fpill {
+  background: var(--surface3); border: 1px solid var(--border2);
+  color: var(--fg); padding: .25rem .7rem;
+  border-radius: 6px; font-size: .8rem; font-weight: 600;
+  font-family: "SF Mono","Fira Code",monospace;
+}
+.fpill.out { background: rgba(91,141,238,.1); border-color: rgba(91,141,238,.3); color: var(--accent); }
+
+.quality-table { width: 100%; border-collapse: collapse; max-width: 520px; margin-top: 2rem; }
+.quality-table th, .quality-table td {
+  padding: .6rem .9rem; text-align: left; border-bottom: 1px solid var(--border);
+  font-size: .85rem;
+}
+.quality-table th { color: var(--fg2); font-weight: 600; background: var(--surface); }
+.quality-table td { color: var(--fg); }
+.quality-table tr:last-child td { border-bottom: none; }
+
+/* ── Themes ───────────────────────────────────────────────────────────────── */
+.themes-row { display: flex; gap: .6rem; flex-wrap: wrap; }
+.theme-swatch {
+  width: 44px; height: 44px; border-radius: 8px;
+  border: 2px solid transparent;
+  cursor: default; transition: transform .2s;
+  position: relative;
+}
+.theme-swatch:hover { transform: scale(1.1); }
+.theme-swatch[data-name]::after {
+  content: attr(data-name);
+  position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%);
+  font-size: .65rem; color: var(--fg3); white-space: nowrap;
+}
+.ts-active { border-color: var(--accent); }
+
+/* ── Downloads ────────────────────────────────────────────────────────────── */
+.dl-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.25rem; max-width: 720px;
+}
+.dl-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 2rem;
+  display: flex; flex-direction: column; gap: 1rem;
+}
+.dl-card h3 { font-size: 1.1rem; font-weight: 700; }
+.dl-card p { font-size: .875rem; color: var(--fg2); flex: 1; }
+.dl-badge {
+  display: inline-block; background: rgba(61,220,132,.1);
+  border: 1px solid rgba(61,220,132,.25);
+  color: var(--green); font-size: .72rem; font-weight: 700;
+  padding: .15rem .55rem; border-radius: 20px; margin-bottom: .25rem;
+}
+
+/* ── FAQ ──────────────────────────────────────────────────────────────────── */
+.faq-bg { background: var(--bg2); }
+.faq-list { max-width: 720px; }
+.faq-item {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: .75rem;
+  overflow: hidden;
+}
+.faq-q {
+  width: 100%; background: var(--surface); border: none; color: var(--fg);
+  padding: 1rem 1.25rem; text-align: left; font-size: .95rem; font-weight: 600;
+  cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+  transition: background .2s;
+}
+.faq-q:hover { background: var(--surface2); }
+.faq-q .faq-icon { color: var(--fg2); font-size: 1.1rem; transition: transform .25s; flex-shrink: 0; }
+.faq-q.open .faq-icon { transform: rotate(45deg); }
+.faq-a {
+  background: var(--surface2); padding: 0 1.25rem;
+  font-size: .875rem; color: var(--fg2); line-height: 1.65;
+  max-height: 0; overflow: hidden; transition: max-height .3s ease, padding .3s;
+}
+.faq-a.open { max-height: 300px; padding: .9rem 1.25rem; }
+
+/* ── Footer ───────────────────────────────────────────────────────────────── */
+.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 3rem 0 2rem;
+}
+.footer-grid {
+  display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 2rem;
+  margin-bottom: 2.5rem;
+}
+.footer-brand p { font-size: .875rem; color: var(--fg2); margin-top: .6rem; max-width: 280px; }
+.footer-col h4 { font-size: .85rem; font-weight: 700; color: var(--fg); margin-bottom: .75rem; letter-spacing: .04em; text-transform: uppercase; }
+.footer-col a { display: block; color: var(--fg2); font-size: .85rem; margin-bottom: .45rem; text-decoration: none; transition: color .2s; }
+.footer-col a:hover { color: var(--fg); }
+.footer-bottom {
+  border-top: 1px solid var(--border); padding-top: 1.5rem;
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 1rem;
+}
+.footer-bottom p { font-size: .82rem; color: var(--fg3); }
+.footer-badge {
+  display: inline-flex; align-items: center; gap: .4rem;
+  background: rgba(61,220,132,.08); border: 1px solid rgba(61,220,132,.2);
+  color: var(--green); font-size: .75rem; padding: .2rem .65rem; border-radius: 20px;
+}
+
+/* ── Scroll reveal ────────────────────────────────────────────────────────── */
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity .6s ease, transform .6s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+.reveal-delay-1 { transition-delay: .1s; }
+.reveal-delay-2 { transition-delay: .2s; }
+.reveal-delay-3 { transition-delay: .3s; }
+
+/* ── Responsive ───────────────────────────────────────────────────────────── */
+@media (max-width: 860px) {
+  .nav-links, .nav-cta { display: none; }
+  .hamburger { display: flex; }
+  .win-body { height: auto; flex-direction: column; }
+  .wsb { width: 100%; min-width: unset; height: 160px; }
+  .wap { width: 100%; min-width: unset; flex-direction: row; flex-wrap: wrap; }
+  .wap-art { width: 90px; height: 90px; }
+  .steps-grid { grid-template-columns: 1fr; }
+  .format-grid { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 540px) {
+  .dl-grid { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .wt-sel { display: none; }
+}
 </style>
 </head>
 <body>
 
-<!-- Nav -->
-<nav>
-  <div class="nav-brand">
-    <div class="icon">♪</div>
-    Music Manager Ultimate
-  </div>
-  <div class="nav-links">
-    <a href="#features">Features</a>
-    <a href="#how-it-works">How it works</a>
-    <a href="#download">Download</a>
-    <a href="https://github.com/Spinjitsudoom/MusicManagerUltimate" target="_blank">GitHub</a>
+<!-- ── Nav ── -->
+<nav id="nav">
+  <div class="nav-inner">
+    <a class="nav-brand" href="#">
+      <div class="nav-logo">♪</div>
+      Music Manager Ultimate
+    </a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how-it-works">How it works</a>
+      <a href="#install">Install</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://github.com/Spinjitsudoom/MusicManagerUltimate" target="_blank">GitHub ↗</a>
+    </div>
+    <div class="nav-cta">
+      <a class="btn btn-primary btn-sm" href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest">Download</a>
+    </div>
+    <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+      <span></span><span></span><span></span>
+    </div>
   </div>
 </nav>
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#features"  onclick="closeMenu()">Features</a>
+  <a href="#how-it-works" onclick="closeMenu()">How it works</a>
+  <a href="#install"   onclick="closeMenu()">Install</a>
+  <a href="#faq"       onclick="closeMenu()">FAQ</a>
+  <a href="https://github.com/Spinjitsudoom/MusicManagerUltimate" target="_blank">GitHub ↗</a>
+  <a class="btn btn-primary btn-sm" href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest" style="margin-top:.5rem;">Download</a>
+</div>
 
-<!-- Hero -->
-<div class="hero">
-  <h1>Organise your music library<br><span>the smart way</span></h1>
-  <p>Fetches metadata from Spotify, renames your files, writes embedded tags, downloads cover art, and converts audio formats — all in one app.</p>
-  <div class="hero-btns">
-    <a class="btn btn-primary" href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest">⬇ Download</a>
-    <a class="btn btn-secondary" href="https://github.com/Spinjitsudoom/MusicManagerUltimate">View on GitHub</a>
+<!-- ── Hero ── -->
+<section class="hero">
+  <div class="hero-glow hero-glow-1"></div>
+  <div class="hero-glow hero-glow-2"></div>
+  <div class="hero-glow hero-glow-3"></div>
+  <div class="hero-content">
+    <div class="tag">✦ Open Source · Free · Linux</div>
+    <h1>Your music library,<br><span class="grad">perfectly organised</span></h1>
+    <p>Fetches metadata from Spotify, renames your files, writes embedded tags, downloads cover art, and converts audio formats — all in one desktop app.</p>
+    <div class="hero-btns">
+      <a class="btn btn-primary" href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest/download/MusicManager.AppImage">⬇ AppImage</a>
+      <a class="btn btn-primary" href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest/download/MusicManager.flatpak">⬇ Flatpak</a>
+      <a class="btn btn-secondary" href="https://github.com/Spinjitsudoom/MusicManagerUltimate" target="_blank">View Source</a>
+    </div>
+    <div class="hero-badges">
+      <div class="hero-badge">🎵 <span>Spotify metadata</span></div>
+      <div class="hero-badge">🔍 <span>Fuzzy matching</span></div>
+      <div class="hero-badge">🏷️ <span>Tag writing</span></div>
+      <div class="hero-badge">🔄 <span>Audio conversion</span></div>
+      <div class="hero-badge">🎨 <span>9 themes</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── App mockup ── -->
+<div class="mockup-section">
+  <div class="container">
+    <div class="mockup-outer reveal">
+      <div class="mockup-window">
+
+        <div class="win-bar">
+          <div class="win-dots"><div class="wd wd-r"></div><div class="wd wd-y"></div><div class="wd wd-g"></div></div>
+          <span class="win-title">Music Manager Ultimate v2.1.0</span>
+          <span class="win-menu">File</span>
+        </div>
+
+        <div class="win-toolbar">
+          <div class="wt-btn">Browse</div>
+          <div class="wt-path">/music/Avenged Sevenfold</div>
+          <div class="wt-sel">Avenged Sevenfold ▾</div>
+          <div class="wt-sel">Hail to the King ▾</div>
+          <div class="wt-batch">Batch</div>
+        </div>
+
+        <div class="win-status">
+          <div class="ws-dot" style="color:var(--green)">✓ Hail to the King (2013)</div>
+          <div class="ws-dot" style="color:var(--accent)">11 / 11 matched</div>
+          <div class="ws-dot">0 missing</div>
+          <div class="ws-dot" style="color:var(--green)">● Spotify connected</div>
+        </div>
+
+        <div class="win-body">
+
+          <div class="wsb">
+            <div class="wsb-hdr">Spotify Releases <span class="wsb-badge">34</span></div>
+            <div class="wsb-list">
+              <div class="rel-row"><div class="rel-thumb" style="background:linear-gradient(135deg,#1a0a2e,#3a1060)">♪</div><div class="rel-info"><div class="rel-title">Sounding the Seventh Trumpet</div><div class="rel-meta">2001 · Album</div></div><div class="rel-n">13</div></div>
+              <div class="rel-row"><div class="rel-thumb" style="background:linear-gradient(135deg,#0a1a2e,#102a60)">♪</div><div class="rel-info"><div class="rel-title">Waking the Fallen</div><div class="rel-meta">2003 · Album</div></div><div class="rel-n">12</div></div>
+              <div class="rel-row"><div class="rel-thumb" style="background:linear-gradient(135deg,#2e0a0a,#601010)">♪</div><div class="rel-info"><div class="rel-title">City of Evil</div><div class="rel-meta">2005 · Album</div></div><div class="rel-n">11</div></div>
+              <div class="rel-row"><div class="rel-thumb" style="background:linear-gradient(135deg,#0a2e0a,#106010)">♪</div><div class="rel-info"><div class="rel-title">Nightmare</div><div class="rel-meta">2010 · Album</div></div><div class="rel-n">11</div></div>
+              <div class="rel-row sel"><div class="rel-thumb" style="background:linear-gradient(135deg,#1e1e06,#3a3a00)">♫</div><div class="rel-info"><div class="rel-title">Hail to the King</div><div class="rel-meta">2013 · Album</div></div><div class="rel-n">11</div></div>
+              <div class="rel-row"><div class="rel-thumb" style="background:linear-gradient(135deg,#1a0a1a,#3a003a)">♪</div><div class="rel-info"><div class="rel-title">The Stage</div><div class="rel-meta">2016 · Album</div></div><div class="rel-n">11</div></div>
+              <div class="rel-row"><div class="rel-thumb" style="background:linear-gradient(135deg,#0a1a1a,#003a3a)">♪</div><div class="rel-info"><div class="rel-title">Life Is But a Dream...</div><div class="rel-meta">2023 · Album</div></div><div class="rel-n">10</div></div>
+            </div>
+          </div>
+
+          <div class="wc">
+            <div class="wc-tabs"><div class="wc-tab on">Preview</div><div class="wc-tab">Log</div></div>
+            <div class="wc-body">
+              <div class="prev-hdr">11 matched · 0 unmatched · 11 total</div>
+              <div class="tr-row"><span class="tr-n">1</span><span class="tr-old">01 Shepherd of Fire.flac</span><span class="tr-arr">→</span><span class="tr-new">01 - Shepherd of Fire.flac</span><span class="tr-score s-hi">100%</span></div>
+              <div class="tr-row"><span class="tr-n">2</span><span class="tr-old">02 Hail to the King.flac</span><span class="tr-arr">→</span><span class="tr-new">02 - Hail to the King.flac</span><span class="tr-score s-hi">100%</span></div>
+              <div class="tr-row"><span class="tr-n">3</span><span class="tr-old">03 Doing Time.flac</span><span class="tr-arr">→</span><span class="tr-new">03 - Doing Time.flac</span><span class="tr-score s-hi">100%</span></div>
+              <div class="tr-row"><span class="tr-n">4</span><span class="tr-old">track04.flac</span><span class="tr-arr">→</span><span class="tr-new">04 - This Means War.flac</span><span class="tr-score s-md">78%</span></div>
+              <div class="tr-row"><span class="tr-n">5</span><span class="tr-old">05 Requiem.flac</span><span class="tr-arr">→</span><span class="tr-new">05 - Requiem.flac</span><span class="tr-score s-hi">100%</span></div>
+              <div class="tr-row"><span class="tr-n">6</span><span class="tr-old">06 Crimson Day.flac</span><span class="tr-arr">→</span><span class="tr-new">06 - Crimson Day.flac</span><span class="tr-score s-hi">100%</span></div>
+              <div class="tr-row"><span class="tr-n">7</span><span class="tr-old">07 Heretic.flac</span><span class="tr-arr">→</span><span class="tr-new">07 - Heretic.flac</span><span class="tr-score s-hi">100%</span></div>
+              <div class="tr-row"><span class="tr-n">8</span><span class="tr-old">Coming Home.flac</span><span class="tr-arr">→</span><span class="tr-new">08 - Coming Home.flac</span><span class="tr-score s-hi">95%</span></div>
+            </div>
+          </div>
+
+          <div class="wap">
+            <div class="wap-art">🎵</div>
+            <div class="wap-meta">
+              <div class="wap-row"><span class="wap-lbl">Artist</span><span class="wap-val">Avenged Sevenfold</span></div>
+              <div class="wap-row"><span class="wap-lbl">Album</span><span class="wap-val">Hail to the King</span></div>
+              <div class="wap-row"><span class="wap-lbl">Year</span><span class="wap-val">2013</span></div>
+              <div class="wap-row"><span class="wap-lbl">Genre</span><span class="wap-val">Metal</span></div>
+            </div>
+            <div class="wap-chips"><div class="wap-chip">Art</div><div class="wap-chip">Tags</div><div class="wap-chip">Genre</div></div>
+            <div class="wap-fetch">Fetch Artwork</div>
+          </div>
+
+        </div>
+
+        <div class="win-footer">
+          <span>11 / 11 tracks matched</span>
+          <div class="wf-btns">
+            <div class="wf-btn">Convert</div>
+            <div class="wf-exec">Execute Rename + Tag</div>
+            <div class="wf-btn">Refresh</div>
+            <div class="wf-btn">Undo</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- App Mockup -->
-<section>
-  <h2>See it in <span>action</span></h2>
-  <div class="mockup-wrap">
+<!-- ── Features ── -->
+<section class="section" id="features">
+  <div class="container">
+    <div class="tag reveal">Features</div>
+    <h2 class="section-title reveal">Everything your library needs</h2>
+    <p class="section-sub reveal">From fuzzy filename matching to embedded cover art — every step of the organisation workflow in one place.</p>
+    <div class="features-grid">
 
-    <!-- Title bar -->
-    <div class="titlebar">
-      <div class="dots">
-        <div class="dot dot-r"></div>
-        <div class="dot dot-y"></div>
-        <div class="dot dot-g"></div>
-      </div>
-      <span class="titlebar-title">Music Manager Ultimate v2.1.0</span>
-      <span class="titlebar-menu">File</span>
-    </div>
-
-    <!-- Toolbar -->
-    <div class="app-toolbar">
-      <div class="tb-btn">Browse</div>
-      <div class="tb-input">/music/Avenged Sevenfold</div>
-      <div class="tb-select">Avenged Sevenfold ▾</div>
-      <div class="tb-select">Hail to the King ▾</div>
-      <div class="tb-btn" style="background:#0078d4;color:#fff;border-color:#0078d4;">Batch</div>
-    </div>
-
-    <!-- Status bar -->
-    <div class="status-bar">
-      <div class="status-dot dot-green">✓ Hail to the King (2013)</div>
-      <div class="status-dot dot-blue">11 / 11 matched</div>
-      <div class="status-dot" style="color:#555;">0 missing</div>
-      <div class="status-dot dot-green">● Spotify connected</div>
-    </div>
-
-    <!-- Body -->
-    <div class="app-body">
-
-      <!-- Sidebar -->
-      <div class="sidebar">
-        <div class="sidebar-hdr">
-          SPOTIFY RELEASES
-          <span class="sidebar-badge">34</span>
-        </div>
-        <div class="sidebar-list">
-
-          <div class="release-row">
-            <div class="thumb" style="background:linear-gradient(135deg,#1a0a2e,#3d1b6e);">♪</div>
-            <div class="release-info">
-              <div class="release-title">Sounding the Seventh Trumpet</div>
-              <div class="release-meta">2001 · Album</div>
-            </div>
-            <div class="release-count">13</div>
-          </div>
-
-          <div class="release-row">
-            <div class="thumb" style="background:linear-gradient(135deg,#0a1a2e,#1b3d6e);">♪</div>
-            <div class="release-info">
-              <div class="release-title">Waking the Fallen</div>
-              <div class="release-meta">2003 · Album</div>
-            </div>
-            <div class="release-count">12</div>
-          </div>
-
-          <div class="release-row">
-            <div class="thumb" style="background:linear-gradient(135deg,#2e0a0a,#6e1b1b);">♪</div>
-            <div class="release-info">
-              <div class="release-title">City of Evil</div>
-              <div class="release-meta">2005 · Album</div>
-            </div>
-            <div class="release-count">11</div>
-          </div>
-
-          <div class="release-row">
-            <div class="thumb" style="background:linear-gradient(135deg,#0a2e0a,#1b6e1b);">♪</div>
-            <div class="release-info">
-              <div class="release-title">Nightmare</div>
-              <div class="release-meta">2010 · Album</div>
-            </div>
-            <div class="release-count">11</div>
-          </div>
-
-          <div class="release-row selected">
-            <div class="thumb" style="background:linear-gradient(135deg,#1a1a0a,#3d3d00);">♫</div>
-            <div class="release-info">
-              <div class="release-title">Hail to the King</div>
-              <div class="release-meta">2013 · Album</div>
-            </div>
-            <div class="release-count">11</div>
-          </div>
-
-          <div class="release-row">
-            <div class="thumb" style="background:linear-gradient(135deg,#1a0a1a,#3d003d);">♪</div>
-            <div class="release-info">
-              <div class="release-title">The Stage</div>
-              <div class="release-meta">2016 · Album</div>
-            </div>
-            <div class="release-count">11</div>
-          </div>
-
-          <div class="release-row">
-            <div class="thumb" style="background:linear-gradient(135deg,#0a1a1a,#003d3d);">♪</div>
-            <div class="release-info">
-              <div class="release-title">Life Is But a Dream...</div>
-              <div class="release-meta">2023 · Album</div>
-            </div>
-            <div class="release-count">10</div>
-          </div>
-
-        </div>
+      <div class="feat-card reveal reveal-delay-1">
+        <div class="feat-icon">🎵</div>
+        <h3>Spotify Metadata</h3>
+        <p>Search any artist and browse every release with album art thumbnails loading in the background. Pulls accurate track names, years, and genres directly from Spotify's database.</p>
       </div>
 
-      <!-- Centre -->
-      <div class="centre">
-        <div class="tabs">
-          <div class="tab active">Preview</div>
-          <div class="tab">Log</div>
-        </div>
-        <div class="preview-area">
-          <div class="preview-hdr">11 matched · 0 unmatched · 11 total</div>
-
-          <div class="track-row">
-            <span class="track-num">1</span>
-            <span class="track-name">01 Shepherd of Fire.flac</span>
-            <span class="arrow">→</span>
-            <span class="track-new">01 - Shepherd of Fire.flac</span>
-            <span class="score score-high">100%</span>
-          </div>
-          <div class="track-row">
-            <span class="track-num">2</span>
-            <span class="track-name">02 Hail to the King.flac</span>
-            <span class="arrow">→</span>
-            <span class="track-new">02 - Hail to the King.flac</span>
-            <span class="score score-high">100%</span>
-          </div>
-          <div class="track-row">
-            <span class="track-num">3</span>
-            <span class="track-name">03 Doing Time.flac</span>
-            <span class="arrow">→</span>
-            <span class="track-new">03 - Doing Time.flac</span>
-            <span class="score score-high">100%</span>
-          </div>
-          <div class="track-row">
-            <span class="track-num">4</span>
-            <span class="track-name">track04.flac</span>
-            <span class="arrow">→</span>
-            <span class="track-new">04 - This Means War.flac</span>
-            <span class="score score-mid">78%</span>
-          </div>
-          <div class="track-row">
-            <span class="track-num">5</span>
-            <span class="track-name">05 Requiem.flac</span>
-            <span class="arrow">→</span>
-            <span class="track-new">05 - Requiem.flac</span>
-            <span class="score score-high">100%</span>
-          </div>
-          <div class="track-row">
-            <span class="track-num">6</span>
-            <span class="track-name">06 Crimson Day.flac</span>
-            <span class="arrow">→</span>
-            <span class="track-new">06 - Crimson Day.flac</span>
-            <span class="score score-high">100%</span>
-          </div>
-          <div class="track-row">
-            <span class="track-num">7</span>
-            <span class="track-name">07 Heretic.flac</span>
-            <span class="arrow">→</span>
-            <span class="track-new">07 - Heretic.flac</span>
-            <span class="score score-high">100%</span>
-          </div>
-          <div class="track-row">
-            <span class="track-num">8</span>
-            <span class="track-name">Coming Home.flac</span>
-            <span class="arrow">→</span>
-            <span class="track-new">08 - Coming Home.flac</span>
-            <span class="score score-high">95%</span>
-          </div>
-        </div>
+      <div class="feat-card reveal reveal-delay-2">
+        <div class="feat-icon">🔍</div>
+        <h3>Fuzzy File Matching</h3>
+        <p>Automatically maps your audio files to the correct tracks using Levenshtein edit-distance scoring. Works even with messy, numbered, or incomplete filenames.</p>
       </div>
 
-      <!-- Art panel -->
-      <div class="art-panel">
-        <div class="art-img">🎵</div>
-        <div class="meta-grid">
-          <div class="meta-row"><span class="meta-label">Artist</span><span class="meta-val">Avenged Sevenfold</span></div>
-          <div class="meta-row"><span class="meta-label">Album</span><span class="meta-val">Hail to the King</span></div>
-          <div class="meta-row"><span class="meta-label">Year</span><span class="meta-val">2013</span></div>
-          <div class="meta-row"><span class="meta-label">Genre</span><span class="meta-val">Metal</span></div>
-        </div>
-        <div class="chips">
-          <div class="chip">Art</div>
-          <div class="chip">Tags</div>
-          <div class="chip">Genre</div>
-        </div>
-        <div class="fetch-btn">Fetch Artwork</div>
+      <div class="feat-card reveal reveal-delay-3">
+        <div class="feat-icon">🏷️</div>
+        <h3>Tag Writing</h3>
+        <p>Embeds artist, album, title, year, genre, track number, disc number, and cover art into ID3v2 (MP3), Vorbis comments (FLAC/OGG), and MP4/M4A atoms via TagLib.</p>
       </div>
 
-    </div><!-- /app-body -->
-
-    <!-- App footer -->
-    <div class="app-footer">
-      <span>11 / 11 tracks matched</span>
-      <div class="footer-btns">
-        <div class="foot-btn">Convert</div>
-        <div class="foot-btn primary">Execute Rename + Tag</div>
-        <div class="foot-btn">Refresh</div>
-        <div class="foot-btn">Undo</div>
+      <div class="feat-card reveal reveal-delay-1">
+        <div class="feat-icon">🖼️</div>
+        <h3>Cover Art</h3>
+        <p>Downloads the highest-resolution image from Spotify's CDN and embeds it directly into your files. The sidebar shows 64×64 thumbnails for every release as they load asynchronously.</p>
       </div>
+
+      <div class="feat-card reveal reveal-delay-2">
+        <div class="feat-icon">🔄</div>
+        <h3>Audio Conversion</h3>
+        <p>Convert between MP3, FLAC, M4A, OGG, and WAV via FFmpeg. AAC↔M4A is remuxed losslessly; all other pairs transcode with Low / Medium / High / Best quality presets.</p>
+      </div>
+
+      <div class="feat-card reveal reveal-delay-3">
+        <div class="feat-icon">↩️</div>
+        <h3>Preview & Undo</h3>
+        <p>The Preview tab shows every file → new name mapping with a confidence percentage before anything is changed. Every execute can be fully reversed with one click.</p>
+      </div>
+
+      <div class="feat-card reveal reveal-delay-1">
+        <div class="feat-icon">📁</div>
+        <h3>Batch Mode</h3>
+        <p>Process an entire artist root directory in one click — the app auto-detects and matches every album sub-folder without manual selection.</p>
+      </div>
+
+      <div class="feat-card reveal reveal-delay-2">
+        <div class="feat-icon">🎨</div>
+        <h3>9 Colour Themes</h3>
+        <p>Dark, Light, Midnight, Emerald, Amethyst, Crimson, Forest, Ocean, and Slate. Switch instantly from File → Settings with no restart required.</p>
+      </div>
+
+      <div class="feat-card reveal reveal-delay-3">
+        <div class="feat-icon">💾</div>
+        <h3>Persistent Config</h3>
+        <p>Your Spotify credentials, last-used directory, selected theme, and conversion settings are saved between sessions automatically.</p>
+      </div>
+
     </div>
-
-  </div><!-- /mockup-wrap -->
-</section>
-
-<!-- Features -->
-<section id="features" style="background:var(--surface);padding-top:4rem;padding-bottom:4rem;max-width:100%;">
-  <div style="max-width:1100px;margin:0 auto;padding:0 2rem;">
-  <h2>Everything you need to <span>clean up your library</span></h2>
-  <div class="features">
-
-    <div class="feature-card">
-      <div class="feature-icon">🎵</div>
-      <h3>Spotify Metadata</h3>
-      <p>Search any artist, browse every release with album art thumbnails, and pull accurate track names, years, and genres directly from Spotify's database.</p>
-    </div>
-
-    <div class="feature-card">
-      <div class="feature-icon">🔍</div>
-      <h3>Fuzzy File Matching</h3>
-      <p>Automatically maps your local audio files to the correct tracks using edit-distance scoring — works even with messy or incomplete filenames.</p>
-    </div>
-
-    <div class="feature-card">
-      <div class="feature-icon">🏷️</div>
-      <h3>Tag Writing</h3>
-      <p>Embeds artist, album, title, year, genre, track number, disc number, and cover art into ID3v2 (MP3), Vorbis (FLAC/OGG), and MP4/M4A atoms.</p>
-    </div>
-
-    <div class="feature-card">
-      <div class="feature-icon">🖼️</div>
-      <h3>Cover Art</h3>
-      <p>Downloads the highest-resolution image from Spotify's CDN and embeds it into your files. The sidebar shows 64×64 thumbnails for every release as they load.</p>
-    </div>
-
-    <div class="feature-card">
-      <div class="feature-icon">🔄</div>
-      <h3>Audio Conversion</h3>
-      <p>Convert between MP3, FLAC, M4A, OGG, and WAV via FFmpeg. AAC↔M4A is remuxed losslessly; all other pairs are transcoded with Low / Medium / High / Best quality presets.</p>
-    </div>
-
-    <div class="feature-card">
-      <div class="feature-icon">↩️</div>
-      <h3>Preview & Undo</h3>
-      <p>See exactly which files will be renamed and what their new names will be before committing. Every execute operation can be fully reversed.</p>
-    </div>
-
-    <div class="feature-card">
-      <div class="feature-icon">📁</div>
-      <h3>Batch Mode</h3>
-      <p>Process an entire artist directory in one click — the app auto-detects and matches every album sub-folder without manual selection.</p>
-    </div>
-
-    <div class="feature-card">
-      <div class="feature-icon">🎨</div>
-      <h3>9 Colour Themes</h3>
-      <p>Dark, Light, Midnight, Emerald, Amethyst, Crimson, Forest, Ocean, and Slate — switch instantly from File → Settings.</p>
-    </div>
-
-  </div>
   </div>
 </section>
 
-<!-- How it works -->
-<section id="how-it-works">
-  <h2>How it <span>works</span></h2>
-  <div class="steps">
+<!-- ── How it works ── -->
+<section class="section how-bg" id="how-it-works">
+  <div class="container">
+    <div class="tag reveal">Workflow</div>
+    <h2 class="section-title reveal">How it <span>works</span></h2>
+    <p class="section-sub reveal">Six steps from a folder of messy audio files to a perfectly tagged library.</p>
+    <div class="steps-grid">
 
-    <div class="step">
-      <div class="step-num">1</div>
-      <div class="step-body">
-        <h3>Browse to your music folder</h3>
-        <p>Point the app at a root directory containing artist sub-folders. The path is remembered between sessions.</p>
+      <div class="step-card reveal reveal-delay-1">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h3>Browse to your music folder</h3>
+          <p>Point the app at a root directory containing artist sub-folders. The path is remembered between sessions.</p>
+        </div>
       </div>
-    </div>
 
-    <div class="step">
-      <div class="step-num">2</div>
-      <div class="step-body">
-        <h3>Artist is auto-detected</h3>
-        <p>The app searches Spotify for the folder name and populates the releases sidebar with album art thumbnails loading in the background.</p>
+      <div class="step-card reveal reveal-delay-2">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h3>Artist auto-detected</h3>
+          <p>The app searches Spotify for the folder name and populates the releases sidebar with thumbnails loading in the background.</p>
+        </div>
       </div>
-    </div>
 
-    <div class="step">
-      <div class="step-num">3</div>
-      <div class="step-body">
-        <h3>Select a release</h3>
-        <p>Click any album or single. The app fetches the full track list, cover art, and metadata from Spotify.</p>
+      <div class="step-card reveal reveal-delay-1">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h3>Select a release</h3>
+          <p>Click any album or single. The app fetches the full track list, cover art, and metadata from Spotify instantly.</p>
+        </div>
       </div>
-    </div>
 
-    <div class="step">
-      <div class="step-num">4</div>
-      <div class="step-body">
-        <h3>Review the match preview</h3>
-        <p>The Preview tab shows every file → new name mapping with a confidence percentage. High-confidence matches are green; uncertain ones are amber.</p>
+      <div class="step-card reveal reveal-delay-2">
+        <div class="step-num">4</div>
+        <div class="step-body">
+          <h3>Review the preview</h3>
+          <p>The Preview tab shows every file → new name mapping with a confidence percentage. Green = high confidence, amber = uncertain.</p>
+        </div>
       </div>
-    </div>
 
-    <div class="step">
-      <div class="step-num">5</div>
-      <div class="step-body">
-        <h3>Execute Rename + Tag</h3>
-        <p>One click renames all files, writes embedded tags (title, artist, album, year, genre, track number), and embeds the cover art.</p>
+      <div class="step-card reveal reveal-delay-1">
+        <div class="step-num">5</div>
+        <div class="step-body">
+          <h3>Execute Rename + Tag</h3>
+          <p>One click renames all files, writes every embedded tag, and embeds the full-resolution cover art.</p>
+        </div>
       </div>
-    </div>
 
-    <div class="step">
-      <div class="step-num">6</div>
-      <div class="step-body">
-        <h3>Undo if needed</h3>
-        <p>Changed your mind? Hit Undo to restore the original filenames instantly.</p>
+      <div class="step-card reveal reveal-delay-2">
+        <div class="step-num">6</div>
+        <div class="step-body">
+          <h3>Undo if needed</h3>
+          <p>Changed your mind? Hit Undo to restore every original filename in one operation.</p>
+        </div>
       </div>
-    </div>
 
+    </div>
   </div>
 </section>
 
-<!-- Download -->
-<section id="download" style="background:var(--surface);padding-top:4rem;padding-bottom:4rem;max-width:100%;">
-  <div style="max-width:1100px;margin:0 auto;padding:0 2rem;">
-  <h2>Download <span>v2.1.0</span></h2>
-  <div class="dl-cards">
+<!-- ── Install ── -->
+<section class="section" id="install">
+  <div class="container">
+    <div class="tag reveal">Installation</div>
+    <h2 class="section-title reveal">Get <span>running</span> in seconds</h2>
+    <p class="section-sub reveal">Two packaging formats available — pick whichever suits your system.</p>
 
-    <div class="dl-card">
-      <h3>AppImage</h3>
-      <p>Requires <code>qt6-qtbase</code> and <code>qt6-qtbase-gui</code> on the host system.</p>
-      <pre>chmod +x MusicManager.AppImage
+    <div class="reveal">
+      <div class="install-tabs">
+        <button class="itab active" onclick="switchTab('appimage')">AppImage</button>
+        <button class="itab"        onclick="switchTab('flatpak')">Flatpak</button>
+        <button class="itab"        onclick="switchTab('source')">Build from Source</button>
+      </div>
+
+      <div class="itab-panel active" id="tab-appimage">
+        <p>Requires <code>qt6-qtbase</code> and <code>qt6-qtbase-gui</code> on the host system.</p>
+        <p>On Fedora/RHEL:</p>
+        <div class="code-block">
+          <pre>sudo dnf install qt6-qtbase qt6-qtbase-gui</pre>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <p>On Ubuntu/Debian:</p>
+        <div class="code-block">
+          <pre>sudo apt install qt6-base qt6-base-gui</pre>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <p>Then download and run:</p>
+        <div class="code-block">
+          <pre>chmod +x MusicManager.AppImage
 ./MusicManager.AppImage</pre>
-      <a class="btn btn-primary" style="width:100%;justify-content:center;" href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest/download/MusicManager.AppImage">⬇ Download AppImage</a>
-    </div>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <a class="btn btn-primary" href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest/download/MusicManager.AppImage" style="margin-top:.5rem;display:inline-flex;">⬇ Download AppImage</a>
+      </div>
 
-    <div class="dl-card">
-      <h3>Flatpak</h3>
-      <p>Self-contained — no system Qt6 required. Works on any Linux with Flatpak installed.</p>
-      <pre>flatpak install --user MusicManager.flatpak
+      <div class="itab-panel" id="tab-flatpak">
+        <p>Self-contained — no system Qt6 required. Works on any Linux with Flatpak installed.</p>
+        <div class="code-block">
+          <pre>flatpak install --user MusicManager.flatpak
 flatpak run com.musicmanager.MusicManager</pre>
-      <a class="btn btn-primary" style="width:100%;justify-content:center;" href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest/download/MusicManager.flatpak">⬇ Download Flatpak</a>
-    </div>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <a class="btn btn-primary" href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest/download/MusicManager.flatpak" style="margin-top:.5rem;display:inline-flex;">⬇ Download Flatpak</a>
+      </div>
 
-  </div>
-  <p style="text-align:center;margin-top:1.5rem;font-size:.85rem;color:var(--fg-muted);">
-    Requires a free <a href="https://developer.spotify.com/dashboard" style="color:var(--accent);">Spotify Developer account</a> for metadata access.
-    Enter your Client ID and Secret in <strong>File → Settings</strong> after launching.
-  </p>
+      <div class="itab-panel" id="tab-source">
+        <p>Requires CMake ≥ 3.16, a C++17 compiler, Qt6, and OpenSSL. <code>libcurl</code> and <code>TagLib</code> are auto-fetched if not found.</p>
+        <p>On Fedora:</p>
+        <div class="code-block">
+          <pre>sudo dnf install cmake gcc-c++ qt6-qtbase-devel openssl-devel</pre>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <p>Build:</p>
+        <div class="code-block">
+          <pre>git clone https://github.com/Spinjitsudoom/MusicManagerUltimate
+cd MusicManagerUltimate/"c++ source code"
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j$(nproc)
+./build/MusicManager</pre>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 
-<!-- Page footer -->
-<div class="page-footer">
-  <p>Music Manager Ultimate · MIT License · <a href="https://github.com/Spinjitsudoom/MusicManagerUltimate">GitHub</a></p>
-</div>
+<!-- ── Spotify setup ── -->
+<section class="section-sm how-bg">
+  <div class="container">
+    <div class="tag reveal">Configuration</div>
+    <h2 class="section-title reveal">Spotify API <span>setup</span></h2>
+    <p class="section-sub reveal">A free Spotify developer account is all you need — no paid subscription required.</p>
+    <div class="spotify-steps reveal">
+      <div class="spotify-step">
+        <div class="sp-num">1</div>
+        <div class="sp-body">
+          <h3>Create a Spotify app</h3>
+          <p>Go to <a href="https://developer.spotify.com/dashboard" target="_blank">developer.spotify.com/dashboard</a> and click <strong>Create App</strong>. Name it anything you like.</p>
+        </div>
+      </div>
+      <div class="spotify-step">
+        <div class="sp-num">2</div>
+        <div class="sp-body">
+          <h3>Copy your credentials</h3>
+          <p>From the app dashboard, copy your <strong>Client ID</strong> and <strong>Client Secret</strong>.</p>
+        </div>
+      </div>
+      <div class="spotify-step">
+        <div class="sp-num">3</div>
+        <div class="sp-body">
+          <h3>Paste into Settings</h3>
+          <p>In Music Manager: open <strong>File → Settings</strong>, paste both values, and click <strong>Save</strong>.</p>
+        </div>
+      </div>
+      <div class="spotify-step">
+        <div class="sp-num">4</div>
+        <div class="sp-body">
+          <h3>You're connected</h3>
+          <p>The status bar will show a green <strong>● Spotify connected</strong> indicator. Start browsing your library.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Conversion ── -->
+<section class="section conv-bg">
+  <div class="container">
+    <div class="tag reveal">Audio Conversion</div>
+    <h2 class="section-title reveal">Convert between any <span>audio format</span></h2>
+    <p class="section-sub reveal">FFmpeg-powered conversion with lossless remux support and quality presets for lossy output.</p>
+
+    <div class="format-grid reveal">
+      <div class="format-card">
+        <h3>Input formats</h3>
+        <div class="format-pills">
+          <span class="fpill">MP3</span><span class="fpill">FLAC</span><span class="fpill">M4A</span>
+          <span class="fpill">AAC</span><span class="fpill">MP4</span><span class="fpill">OGG</span>
+          <span class="fpill">WAV</span><span class="fpill">OPUS</span><span class="fpill">WMA</span>
+        </div>
+      </div>
+      <div class="format-card">
+        <h3>Output formats</h3>
+        <div class="format-pills">
+          <span class="fpill out">MP3</span><span class="fpill out">FLAC</span><span class="fpill out">M4A</span>
+          <span class="fpill out">OGG</span><span class="fpill out">WAV</span>
+        </div>
+        <p style="font-size:.8rem;color:var(--fg3);margin-top:.75rem;">AAC↔M4A and MP4→M4A are remuxed losslessly (stream copy).</p>
+      </div>
+    </div>
+
+    <table class="quality-table reveal" style="margin-top:2.5rem;">
+      <thead>
+        <tr><th>Preset</th><th>MP3</th><th>AAC / M4A</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Low</td><td>128 kbps</td><td>128 kbps</td></tr>
+        <tr><td>Medium <span style="color:var(--accent);font-size:.75rem;">default</span></td><td>192 kbps</td><td>192 kbps</td></tr>
+        <tr><td>High</td><td>320 kbps</td><td>256 kbps</td></tr>
+        <tr><td>Best</td><td>VBR V0</td><td>256 kbps</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ── Download ── -->
+<section class="section" id="download">
+  <div class="container">
+    <div class="tag reveal">Download</div>
+    <h2 class="section-title reveal">Get <span>Music Manager Ultimate</span></h2>
+    <p class="section-sub reveal">Free and open source. Pick the package that works best for your system.</p>
+    <div class="dl-grid">
+
+      <div class="dl-card reveal reveal-delay-1">
+        <div>
+          <div class="dl-badge">Linux · Any distro</div>
+          <h3>AppImage</h3>
+        </div>
+        <p>Single executable, no install needed. Requires Qt6 runtime on the host system (<code>qt6-qtbase</code>).</p>
+        <a class="btn btn-primary" href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest/download/MusicManager.AppImage">⬇ Download AppImage</a>
+      </div>
+
+      <div class="dl-card reveal reveal-delay-2">
+        <div>
+          <div class="dl-badge">Linux · Flatpak</div>
+          <h3>Flatpak</h3>
+        </div>
+        <p>Fully sandboxed, self-contained bundle. No system Qt6 required — everything is included.</p>
+        <a class="btn btn-primary" href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest/download/MusicManager.flatpak">⬇ Download Flatpak</a>
+      </div>
+
+    </div>
+    <p style="margin-top:1.5rem;font-size:.85rem;color:var(--fg3);">
+      Both builds are v2.1.0. Source code available on <a href="https://github.com/Spinjitsudoom/MusicManagerUltimate">GitHub</a>.
+    </p>
+  </div>
+</section>
+
+<!-- ── FAQ ── -->
+<section class="section faq-bg" id="faq">
+  <div class="container">
+    <div class="tag reveal">FAQ</div>
+    <h2 class="section-title reveal">Common <span>questions</span></h2>
+    <div class="faq-list reveal">
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Do I need a paid Spotify subscription?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">No. The app uses the Spotify Web API with a free developer account. You only need to create an app at developer.spotify.com to get a Client ID and Client Secret — no premium subscription is required.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          What audio formats are supported for tagging?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">Tag writing supports MP3 (ID3v2), FLAC and OGG (Vorbis comments), and M4A/MP4 (MP4 atoms) via TagLib. Renaming works on any file format since it only touches the filename.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Does the AppImage work without internet?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">The app requires internet to fetch metadata from Spotify. Once art and metadata are cached for a release, navigating within the same session works without additional requests.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Do I need FFmpeg installed?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">FFmpeg is only required if you use the audio conversion feature (File → Convert). Renaming, tagging, and cover art all work without it. On Fedora: <code>sudo dnf install ffmpeg</code>.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Can I undo a rename after closing the app?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">Undo history is stored in memory for the current session only. Once you close the app, the rename history is lost. Always preview before executing if you're unsure.</div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Is there a Python version too?
+          <span class="faq-icon">+</span>
+        </button>
+        <div class="faq-a">Yes — the <code>python source code/</code> directory in the repo contains a full Python implementation using customtkinter and Mutagen. It has the same feature set and runs on Python 3.9+. Install dependencies with <code>pip install customtkinter pillow spotipy thefuzz mutagen</code>.</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ── -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="nav-brand" style="color:var(--fg);">
+          <div class="nav-logo">♪</div>
+          Music Manager Ultimate
+        </div>
+        <p>A free, open-source music library organiser for Linux. Powered by Spotify, TagLib, and Qt6.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Product</h4>
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How it works</a>
+        <a href="#download">Download</a>
+        <a href="#faq">FAQ</a>
+      </div>
+      <div class="footer-col">
+        <h4>Install</h4>
+        <a href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest/download/MusicManager.AppImage">AppImage</a>
+        <a href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest/download/MusicManager.flatpak">Flatpak</a>
+        <a href="https://github.com/Spinjitsudoom/MusicManagerUltimate">Source Code</a>
+      </div>
+      <div class="footer-col">
+        <h4>Links</h4>
+        <a href="https://github.com/Spinjitsudoom/MusicManagerUltimate" target="_blank">GitHub</a>
+        <a href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases" target="_blank">Releases</a>
+        <a href="https://developer.spotify.com/dashboard" target="_blank">Spotify Dev</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 Music Manager Ultimate · MIT License</p>
+      <div class="footer-badge">● v2.1.0</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// Nav scroll
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 20);
+});
+
+// Mobile menu
+function toggleMenu() { document.getElementById('mobileMenu').classList.toggle('open'); }
+function closeMenu()  { document.getElementById('mobileMenu').classList.remove('open'); }
+
+// Install tabs
+function switchTab(id) {
+  document.querySelectorAll('.itab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.itab-panel').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('tab-' + id).classList.add('active');
+}
+
+// Copy buttons
+function copyCode(btn) {
+  const text = btn.parentElement.querySelector('pre').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// FAQ
+function toggleFaq(btn) {
+  const ans = btn.nextElementSibling;
+  const open = ans.classList.contains('open');
+  document.querySelectorAll('.faq-a').forEach(a => a.classList.remove('open'));
+  document.querySelectorAll('.faq-q').forEach(q => q.classList.remove('open'));
+  if (!open) { ans.classList.add('open'); btn.classList.add('open'); }
+}
+
+// Scroll reveal
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
 
 </body>
 </html>
