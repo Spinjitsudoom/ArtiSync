@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Music Manager Ultimate
+Comment=Organize and tag your music library
+Exec=MusicManager
+Icon=com.musicmanager.MusicManager
+Categories=AudioVideo;Audio;Music;
+Terminal=false
+StartupWMClass=MusicManager

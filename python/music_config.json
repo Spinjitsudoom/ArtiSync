@@ -1,0 +1,10 @@
+{
+    "auto_remux": true,
+    "auto_remux_delete_source": true,
+    "auto_remux_quality": "best",
+    "auto_remux_target": ".flac",
+    "path": "/var/mnt/Drive J/Reorganized music",
+    "spotify_id": "e3b6360c747c4a0986c32e01779b62a0",
+    "spotify_secret": "f1644ebef08e4a9a953809ac25f82806",
+    "theme": "Dark"
+}

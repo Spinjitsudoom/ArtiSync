@@ -1,0 +1,29 @@
+# Build output
+c++ compiled/
+final result/
+Flatpak final result/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+*.spec
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project internals
+.cache
+.codex
+.claude/
+rules/
