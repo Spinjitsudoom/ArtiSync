@@ -1,0 +1,119 @@
+name: Build Windows & macOS
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  # ── Windows ──────────────────────────────────────────────────────────────────
+  build-windows:
+    name: Windows
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt 6
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '6.7.3'
+          host: windows
+          target: desktop
+          arch: win64_msvc2019_64
+          cache: true
+
+      - name: Configure
+        working-directory: "c++ source code"
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        working-directory: "c++ source code"
+        run: cmake --build build --config Release --parallel
+
+      - name: Deploy Qt (bundle DLLs)
+        working-directory: "c++ source code"
+        run: windeployqt --release build\Release\MusicManager.exe
+
+      - name: Package as zip
+        working-directory: "c++ source code"
+        shell: pwsh
+        run: Compress-Archive -Path build\Release\* -DestinationPath MusicManager-Windows.zip
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MusicManager-Windows
+          path: "c++ source code/MusicManager-Windows.zip"
+
+  # ── macOS ─────────────────────────────────────────────────────────────────────
+  build-macos:
+    name: macOS
+    runs-on: macos-13        # Intel x86_64 — runs on all Macs via Rosetta
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt 6
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '6.7.3'
+          host: mac
+          target: desktop
+          arch: clang_64
+          cache: true
+
+      - name: Configure
+        working-directory: "c++ source code"
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        working-directory: "c++ source code"
+        run: cmake --build build --parallel
+
+      - name: Package as DMG
+        working-directory: "c++ source code"
+        run: |
+          macdeployqt build/MusicManager.app -dmg
+          mv build/MusicManager.dmg MusicManager-macOS.dmg
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MusicManager-macOS
+          path: "c++ source code/MusicManager-macOS.dmg"
+
+  # ── Attach to GitHub Release (tag pushes only) ────────────────────────────────
+  release:
+    name: Publish to Release
+    needs: [build-windows, build-macos]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts/
+          merge-multiple: true
+
+      - name: Upload assets to GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Create release if it doesn't exist yet, otherwise just upload
+          gh release create "${{ github.ref_name }}" \
+            --title "MusicManager ${{ github.ref_name }}" \
+            --generate-notes \
+            artifacts/MusicManager-Windows.zip \
+            artifacts/MusicManager-macOS.dmg \
+          || gh release upload "${{ github.ref_name }}" \
+            artifacts/MusicManager-Windows.zip \
+            artifacts/MusicManager-macOS.dmg \
+            --clobber
