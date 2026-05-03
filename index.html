@@ -649,6 +649,27 @@ nav.scrolled {
   padding: .15rem .55rem; border-radius: 20px; margin-bottom: .25rem;
 }
 
+.dl-card-actions { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; }
+.dl-toggle {
+  background: none; border: 1px solid var(--border2); color: var(--fg2);
+  border-radius: var(--radius); padding: .45rem .9rem; font-size: .85rem;
+  cursor: pointer; transition: color .2s, border-color .2s;
+}
+.dl-toggle:hover { color: var(--fg); border-color: var(--accent); }
+.dl-toggle.open { color: var(--accent); border-color: var(--accent); }
+.dl-install { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+.dl-install p { font-size: .875rem; color: var(--fg2); margin-bottom: .5rem; }
+.dl-install a { color: var(--accent); }
+.dl-source { margin-top: 1.5rem; border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.dl-source-hdr {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 1.5rem; cursor: pointer; background: var(--surface);
+  font-weight: 600; font-size: .95rem; user-select: none;
+}
+.dl-source-hdr:hover { background: var(--surface2); }
+.dl-source-body { padding: 1.25rem 1.5rem; border-top: 1px solid var(--border); }
+.dl-source-body p { font-size: .875rem; color: var(--fg2); margin-bottom: .5rem; }
+
 /* ── FAQ ──────────────────────────────────────────────────────────────────── */
 .faq-bg { background: var(--bg2); }
 .faq-list { max-width: 720px; }
@@ -748,7 +769,7 @@ nav.scrolled {
     <div class="nav-links">
       <a href="#features">Features</a>
       <a href="#how-it-works">How it works</a>
-      <a href="#install">Install</a>
+      <a href="#download">Download</a>
       <a href="#faq">FAQ</a>
       <a href="https://github.com/Spinjitsudoom/MusicManagerUltimate" target="_blank">GitHub ↗</a>
     </div>
@@ -763,7 +784,7 @@ nav.scrolled {
 <div class="mobile-menu" id="mobileMenu">
   <a href="#features"  onclick="closeMenu()">Features</a>
   <a href="#how-it-works" onclick="closeMenu()">How it works</a>
-  <a href="#install"   onclick="closeMenu()">Install</a>
+  <a href="#download"  onclick="closeMenu()">Download</a>
   <a href="#faq"       onclick="closeMenu()">FAQ</a>
   <a href="https://github.com/Spinjitsudoom/MusicManagerUltimate" target="_blank">GitHub ↗</a>
   <a class="btn btn-primary btn-sm" href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest" style="margin-top:.5rem;">Download</a>
@@ -1085,90 +1106,6 @@ nav.scrolled {
   </div>
 </section>
 
-<!-- ── Install ── -->
-<section class="section" id="install">
-  <div class="container">
-    <div class="tag reveal">Installation</div>
-    <h2 class="section-title reveal">Get <span>running</span> in seconds</h2>
-    <p class="section-sub reveal">Four packages available — pick whichever suits your system.</p>
-
-    <div class="reveal">
-      <div class="install-tabs">
-        <button class="itab active" onclick="switchTab('windows')">Windows</button>
-        <button class="itab"        onclick="switchTab('macos')">macOS</button>
-        <button class="itab"        onclick="switchTab('appimage')">AppImage</button>
-        <button class="itab"        onclick="switchTab('flatpak')">Flatpak</button>
-        <button class="itab"        onclick="switchTab('source')">Build from Source</button>
-      </div>
-
-      <div class="itab-panel active" id="tab-windows">
-        <p>Download the zip, extract it, and run <code>MusicManager.exe</code>. All Qt6 DLLs are bundled — no separate install needed.</p>
-        <p>For audio conversion, make sure <a href="https://ffmpeg.org/download.html" target="_blank">FFmpeg</a> is on your <code>PATH</code>.</p>
-        <a class="btn btn-primary" href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest/download/MusicManager-Windows.zip" style="margin-top:.5rem;display:inline-flex;">⬇ Download for Windows</a>
-      </div>
-
-      <div class="itab-panel" id="tab-macos">
-        <p>Open the DMG and drag <strong>Music Manager</strong> to your Applications folder. Runs natively on Intel Macs; Apple Silicon via Rosetta 2.</p>
-        <p>For audio conversion, install FFmpeg via Homebrew:</p>
-        <div class="code-block">
-          <pre>brew install ffmpeg</pre>
-          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-        </div>
-        <a class="btn btn-primary" href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest/download/MusicManager-macOS.dmg" style="margin-top:.5rem;display:inline-flex;">⬇ Download for macOS</a>
-      </div>
-
-      <div class="itab-panel" id="tab-appimage">
-        <p>Requires <code>qt6-qtbase</code> and <code>qt6-qtbase-gui</code> on the host system.</p>
-        <p>On Fedora/RHEL:</p>
-        <div class="code-block">
-          <pre>sudo dnf install qt6-qtbase qt6-qtbase-gui</pre>
-          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-        </div>
-        <p>On Ubuntu/Debian:</p>
-        <div class="code-block">
-          <pre>sudo apt install qt6-base qt6-base-gui</pre>
-          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-        </div>
-        <p>Then download and run:</p>
-        <div class="code-block">
-          <pre>chmod +x MusicManager.AppImage
-./MusicManager.AppImage</pre>
-          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-        </div>
-        <a class="btn btn-primary" href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest/download/MusicManager.AppImage" style="margin-top:.5rem;display:inline-flex;">⬇ Download AppImage</a>
-      </div>
-
-      <div class="itab-panel" id="tab-flatpak">
-        <p>Self-contained — no system Qt6 required. Works on any Linux with Flatpak installed.</p>
-        <div class="code-block">
-          <pre>flatpak install --user MusicManager.flatpak
-flatpak run com.musicmanager.MusicManager</pre>
-          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-        </div>
-        <a class="btn btn-primary" href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest/download/MusicManager.flatpak" style="margin-top:.5rem;display:inline-flex;">⬇ Download Flatpak</a>
-      </div>
-
-      <div class="itab-panel" id="tab-source">
-        <p>Requires CMake ≥ 3.16, a C++17 compiler, Qt6, and OpenSSL. <code>libcurl</code> and <code>TagLib</code> are auto-fetched if not found.</p>
-        <p>On Fedora:</p>
-        <div class="code-block">
-          <pre>sudo dnf install cmake gcc-c++ qt6-qtbase-devel openssl-devel</pre>
-          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-        </div>
-        <p>Build:</p>
-        <div class="code-block">
-          <pre>git clone https://github.com/Spinjitsudoom/MusicManagerUltimate
-cd MusicManagerUltimate/"c++ source code"
-cmake -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build -j$(nproc)
-./build/MusicManager</pre>
-          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- ── Spotify setup ── -->
 <section class="section-sm how-bg">
   <div class="container">
@@ -1253,7 +1190,7 @@ cmake --build build -j$(nproc)
   <div class="container">
     <div class="tag reveal">Download</div>
     <h2 class="section-title reveal">Get <span>Music Manager Ultimate</span></h2>
-    <p class="section-sub reveal">Free and open source. Pick the package that works best for your system.</p>
+    <p class="section-sub reveal">Download and install in seconds — pick your platform.</p>
     <div class="dl-grid">
 
       <div class="dl-card reveal reveal-delay-1">
@@ -1262,7 +1199,15 @@ cmake --build build -j$(nproc)
           <h3>Windows</h3>
         </div>
         <p>Extract the zip and run <code>MusicManager.exe</code>. Qt6 DLLs are bundled — no install required.</p>
-        <a class="btn btn-primary" href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest/download/MusicManager-Windows.zip">⬇ Download for Windows</a>
+        <div class="dl-card-actions">
+          <a class="btn btn-primary" href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest/download/MusicManager-Windows.zip">⬇ Download</a>
+          <button class="dl-toggle" onclick="toggleInstall(this)">▼ Install guide</button>
+        </div>
+        <div class="dl-install" hidden>
+          <p>1. Download and extract the zip.</p>
+          <p>2. Run <code>MusicManager.exe</code> — no installer needed, Qt6 is bundled.</p>
+          <p>3. For audio conversion, add <a href="https://ffmpeg.org/download.html" target="_blank">FFmpeg</a> to your <code>PATH</code>.</p>
+        </div>
       </div>
 
       <div class="dl-card reveal reveal-delay-2">
@@ -1271,7 +1216,15 @@ cmake --build build -j$(nproc)
           <h3>macOS</h3>
         </div>
         <p>Open the DMG and drag Music Manager to your Applications folder. Runs natively on Intel; Apple Silicon via Rosetta 2.</p>
-        <a class="btn btn-primary" href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest/download/MusicManager-macOS.dmg">⬇ Download for macOS</a>
+        <div class="dl-card-actions">
+          <a class="btn btn-primary" href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest/download/MusicManager-macOS.dmg">⬇ Download</a>
+          <button class="dl-toggle" onclick="toggleInstall(this)">▼ Install guide</button>
+        </div>
+        <div class="dl-install" hidden>
+          <p>1. Open the DMG and drag <strong>Music Manager</strong> to Applications.</p>
+          <p>2. For audio conversion, install FFmpeg:</p>
+          <div class="code-block"><pre>brew install ffmpeg</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        </div>
       </div>
 
       <div class="dl-card reveal reveal-delay-3">
@@ -1280,7 +1233,19 @@ cmake --build build -j$(nproc)
           <h3>AppImage</h3>
         </div>
         <p>Single executable, no install needed. Requires Qt6 runtime on the host system (<code>qt6-qtbase</code>).</p>
-        <a class="btn btn-primary" href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest/download/MusicManager.AppImage">⬇ Download AppImage</a>
+        <div class="dl-card-actions">
+          <a class="btn btn-primary" href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest/download/MusicManager.AppImage">⬇ Download</a>
+          <button class="dl-toggle" onclick="toggleInstall(this)">▼ Install guide</button>
+        </div>
+        <div class="dl-install" hidden>
+          <p>On Fedora/RHEL:</p>
+          <div class="code-block"><pre>sudo dnf install qt6-qtbase qt6-qtbase-gui</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <p>On Ubuntu/Debian:</p>
+          <div class="code-block"><pre>sudo apt install qt6-base qt6-base-gui</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          <p>Then run:</p>
+          <div class="code-block"><pre>chmod +x MusicManager.AppImage
+./MusicManager.AppImage</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        </div>
       </div>
 
       <div class="dl-card reveal reveal-delay-4">
@@ -1289,10 +1254,36 @@ cmake --build build -j$(nproc)
           <h3>Flatpak</h3>
         </div>
         <p>Fully sandboxed, self-contained bundle. No system Qt6 required — everything is included.</p>
-        <a class="btn btn-primary" href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest/download/MusicManager.flatpak">⬇ Download Flatpak</a>
+        <div class="dl-card-actions">
+          <a class="btn btn-primary" href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest/download/MusicManager.flatpak">⬇ Download</a>
+          <button class="dl-toggle" onclick="toggleInstall(this)">▼ Install guide</button>
+        </div>
+        <div class="dl-install" hidden>
+          <div class="code-block"><pre>flatpak install --user MusicManager.flatpak
+flatpak run com.musicmanager.MusicManager</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        </div>
       </div>
 
     </div>
+
+    <div class="dl-source reveal">
+      <div class="dl-source-hdr" onclick="toggleSource(this)">
+        <span>⚙ Build from Source</span>
+        <span class="dl-src-arrow">▼</span>
+      </div>
+      <div class="dl-source-body" hidden>
+        <p>Requires CMake ≥ 3.16, a C++17 compiler, Qt6, and OpenSSL. <code>libcurl</code> and <code>TagLib</code> are auto-fetched if not found.</p>
+        <p>On Fedora:</p>
+        <div class="code-block"><pre>sudo dnf install cmake gcc-c++ qt6-qtbase-devel openssl-devel</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <p>Build:</p>
+        <div class="code-block"><pre>git clone https://github.com/Spinjitsudoom/MusicManagerUltimate
+cd MusicManagerUltimate/"c++ source code"
+cmake -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j$(nproc)
+./build/MusicManager</pre><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+      </div>
+    </div>
+
     <p style="margin-top:1.5rem;font-size:.85rem;color:var(--fg3);">
       All builds are v2.1.0. Source code available on <a href="https://github.com/Spinjitsudoom/MusicManagerUltimate">GitHub</a>.
     </p>
@@ -1431,12 +1422,19 @@ function copyDiscord(btn) {
   });
 }
 
-// ── Install tabs ──────────────────────────────────────────────────────────────
-function switchTab(id) {
-  document.querySelectorAll('.itab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.itab-panel').forEach(p => p.classList.remove('active'));
-  event.target.classList.add('active');
-  document.getElementById('tab-' + id).classList.add('active');
+// ── Download accordion ────────────────────────────────────────────────────────
+function toggleInstall(btn) {
+  const panel = btn.closest('.dl-card').querySelector('.dl-install');
+  const open = !panel.hidden;
+  panel.hidden = open;
+  btn.classList.toggle('open', !open);
+  btn.textContent = open ? '▼ Install guide' : '▲ Install guide';
+}
+function toggleSource(hdr) {
+  const body = hdr.nextElementSibling;
+  const arrow = hdr.querySelector('.dl-src-arrow');
+  body.hidden = !body.hidden;
+  arrow.textContent = body.hidden ? '▼' : '▲';
 }
 
 // ── Copy buttons ──────────────────────────────────────────────────────────────
