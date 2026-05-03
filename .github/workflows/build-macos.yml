@@ -1,0 +1,49 @@
+name: Build macOS
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-macos:
+    name: macOS
+    runs-on: macos-13
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Qt 6
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '6.7.3'
+          host: mac
+          target: desktop
+          arch: clang_64
+          cache: true
+
+      - name: Install dependencies via Homebrew
+        run: brew install pkg-config taglib nlohmann-json
+
+      - name: Configure
+        working-directory: "c++ source code"
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH="$(brew --prefix)"
+
+      - name: Build
+        working-directory: "c++ source code"
+        run: cmake --build build --parallel
+
+      - name: Package as DMG
+        working-directory: "c++ source code"
+        run: |
+          macdeployqt build/MusicManager.app -dmg
+          mv build/MusicManager.dmg MusicManager-macOS.dmg
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: MusicManager-macOS
+          path: "c++ source code/MusicManager-macOS.dmg"
