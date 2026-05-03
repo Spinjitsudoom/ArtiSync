@@ -37,6 +37,7 @@
 #include <QDirIterator>
 
 #include <filesystem>
+#include <set>
 #include <thread>
 #include <functional>
 
