@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Music Manager Ultimate — organise your music library with Spotify metadata, fuzzy file matching, tag writing, cover art, and audio conversion.">
 <title>Music Manager Ultimate</title>
+<link rel="icon" type="image/png" href="MusicManager.png">
+<link rel="apple-touch-icon" href="MusicManager.png">
 <style>
 /* ── Reset & base ─────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -133,9 +135,7 @@ nav.scrolled {
 }
 .nav-logo {
   width: 32px; height: 32px; border-radius: 8px;
-  background: var(--accent-g);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1rem;
+  object-fit: contain;
 }
 .nav-links { display: flex; align-items: center; gap: 1.75rem; }
 .nav-links a {
@@ -742,7 +742,7 @@ nav.scrolled {
 <nav id="nav">
   <div class="nav-inner">
     <a class="nav-brand" href="#">
-      <div class="nav-logo">♪</div>
+      <img class="nav-logo" src="MusicManager.png" alt="Music Manager Ultimate logo">
       Music Manager Ultimate
     </a>
     <div class="nav-links">
@@ -1364,7 +1364,7 @@ cmake --build build -j$(nproc)
     <div class="footer-grid">
       <div class="footer-brand">
         <div class="nav-brand" style="color:var(--fg);">
-          <div class="nav-logo">♪</div>
+          <img class="nav-logo" src="MusicManager.png" alt="Music Manager Ultimate logo">
           Music Manager Ultimate
         </div>
         <p>A free, open-source music library organiser for Linux. Powered by Spotify, TagLib, and Qt6.</p>
