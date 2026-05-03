@@ -9,7 +9,6 @@ A cross-platform music library organiser that fetches metadata from **Spotify**,
 | Package | Platform | Description |
 |---|---|---|
 | `MusicManager-Windows.zip` | Windows 10/11 | Extract and run `MusicManager.exe` — Qt6 DLLs bundled |
-| `MusicManager-macOS.dmg` | macOS (Intel + Rosetta 2) | Open the DMG and drag to Applications |
 | `MusicManager.AppImage` | Linux (any) | Self-contained AppImage — download, `chmod +x`, run |
 | `MusicManager.flatpak` | Linux (Flatpak) | Install via `flatpak install` |
 
