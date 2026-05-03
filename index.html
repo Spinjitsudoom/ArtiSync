@@ -632,8 +632,8 @@ nav.scrolled {
 
 /* ── Downloads ────────────────────────────────────────────────────────────── */
 .dl-grid {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.25rem; max-width: 720px;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.25rem; max-width: 1080px;
 }
 .dl-card {
   background: var(--surface); border: 1px solid var(--border);
@@ -1089,16 +1089,34 @@ nav.scrolled {
   <div class="container">
     <div class="tag reveal">Installation</div>
     <h2 class="section-title reveal">Get <span>running</span> in seconds</h2>
-    <p class="section-sub reveal">Two packaging formats available — pick whichever suits your system.</p>
+    <p class="section-sub reveal">Four packages available — pick whichever suits your system.</p>
 
     <div class="reveal">
       <div class="install-tabs">
-        <button class="itab active" onclick="switchTab('appimage')">AppImage</button>
+        <button class="itab active" onclick="switchTab('windows')">Windows</button>
+        <button class="itab"        onclick="switchTab('macos')">macOS</button>
+        <button class="itab"        onclick="switchTab('appimage')">AppImage</button>
         <button class="itab"        onclick="switchTab('flatpak')">Flatpak</button>
         <button class="itab"        onclick="switchTab('source')">Build from Source</button>
       </div>
 
-      <div class="itab-panel active" id="tab-appimage">
+      <div class="itab-panel active" id="tab-windows">
+        <p>Download the zip, extract it, and run <code>MusicManager.exe</code>. All Qt6 DLLs are bundled — no separate install needed.</p>
+        <p>For audio conversion, make sure <a href="https://ffmpeg.org/download.html" target="_blank">FFmpeg</a> is on your <code>PATH</code>.</p>
+        <a class="btn btn-primary" href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest/download/MusicManager-Windows.zip" style="margin-top:.5rem;display:inline-flex;">⬇ Download for Windows</a>
+      </div>
+
+      <div class="itab-panel" id="tab-macos">
+        <p>Open the DMG and drag <strong>Music Manager</strong> to your Applications folder. Runs natively on Intel Macs; Apple Silicon via Rosetta 2.</p>
+        <p>For audio conversion, install FFmpeg via Homebrew:</p>
+        <div class="code-block">
+          <pre>brew install ffmpeg</pre>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <a class="btn btn-primary" href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest/download/MusicManager-macOS.dmg" style="margin-top:.5rem;display:inline-flex;">⬇ Download for macOS</a>
+      </div>
+
+      <div class="itab-panel" id="tab-appimage">
         <p>Requires <code>qt6-qtbase</code> and <code>qt6-qtbase-gui</code> on the host system.</p>
         <p>On Fedora/RHEL:</p>
         <div class="code-block">
@@ -1239,6 +1257,24 @@ cmake --build build -j$(nproc)
 
       <div class="dl-card reveal reveal-delay-1">
         <div>
+          <div class="dl-badge">Windows 10 / 11</div>
+          <h3>Windows</h3>
+        </div>
+        <p>Extract the zip and run <code>MusicManager.exe</code>. Qt6 DLLs are bundled — no install required.</p>
+        <a class="btn btn-primary" href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest/download/MusicManager-Windows.zip">⬇ Download for Windows</a>
+      </div>
+
+      <div class="dl-card reveal reveal-delay-2">
+        <div>
+          <div class="dl-badge">macOS · Intel + Apple Silicon</div>
+          <h3>macOS</h3>
+        </div>
+        <p>Open the DMG and drag Music Manager to your Applications folder. Runs natively on Intel; Apple Silicon via Rosetta 2.</p>
+        <a class="btn btn-primary" href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest/download/MusicManager-macOS.dmg">⬇ Download for macOS</a>
+      </div>
+
+      <div class="dl-card reveal reveal-delay-3">
+        <div>
           <div class="dl-badge">Linux · Any distro</div>
           <h3>AppImage</h3>
         </div>
@@ -1246,7 +1282,7 @@ cmake --build build -j$(nproc)
         <a class="btn btn-primary" href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest/download/MusicManager.AppImage">⬇ Download AppImage</a>
       </div>
 
-      <div class="dl-card reveal reveal-delay-2">
+      <div class="dl-card reveal reveal-delay-4">
         <div>
           <div class="dl-badge">Linux · Flatpak</div>
           <h3>Flatpak</h3>
@@ -1257,7 +1293,7 @@ cmake --build build -j$(nproc)
 
     </div>
     <p style="margin-top:1.5rem;font-size:.85rem;color:var(--fg3);">
-      Both builds are v2.1.0. Source code available on <a href="https://github.com/Spinjitsudoom/MusicManagerUltimate">GitHub</a>.
+      All builds are v2.1.0. Source code available on <a href="https://github.com/Spinjitsudoom/MusicManagerUltimate">GitHub</a>.
     </p>
   </div>
 </section>
@@ -1355,6 +1391,8 @@ cmake --build build -j$(nproc)
       </div>
       <div class="footer-col">
         <h4>Install</h4>
+        <a href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest/download/MusicManager-Windows.zip">Windows</a>
+        <a href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest/download/MusicManager-macOS.dmg">macOS</a>
         <a href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest/download/MusicManager.AppImage">AppImage</a>
         <a href="https://github.com/Spinjitsudoom/MusicManagerUltimate/releases/latest/download/MusicManager.flatpak">Flatpak</a>
         <a href="https://github.com/Spinjitsudoom/MusicManagerUltimate">Source Code</a>
