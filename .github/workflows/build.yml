@@ -60,82 +60,10 @@ jobs:
           name: ArtiSync-Portable
           path: "c++ source code/ArtiSync-Portable.zip"
 
-  # ── Linux AppImage ────────────────────────────────────────────────────────────
-  build-linux:
-    name: Linux AppImage
-    runs-on: ubuntu-22.04
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Qt 6
-        uses: jurplel/install-qt-action@v3
-        with:
-          version: '6.7.3'
-          host: linux
-          target: desktop
-          arch: gcc_64
-          cache: true
-
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y cmake g++ libssl-dev libfuse2 patchelf
-
-      - name: Configure
-        working-directory: "c++ source code"
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
-
-      - name: Build
-        working-directory: "c++ source code"
-        run: cmake --build build --parallel
-
-      - name: Set up AppDir
-        working-directory: "c++ source code"
-        run: |
-          mkdir -p AppDir/usr/bin
-          mkdir -p AppDir/usr/share/applications
-          mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
-          cp build/ArtiSync AppDir/usr/bin/
-          cp resources/ArtiSync.png \
-             AppDir/usr/share/icons/hicolor/256x256/apps/com.artisync.ArtiSync.png
-          cp flatpak/com.artisync.ArtiSync.desktop \
-             AppDir/usr/share/applications/
-
-      - name: Download linuxdeploy + Qt plugin
-        working-directory: "c++ source code"
-        run: |
-          wget -q -O linuxdeploy.AppImage \
-            https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
-          wget -q -O linuxdeploy-plugin-qt-x86_64.AppImage \
-            https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
-          chmod +x linuxdeploy.AppImage linuxdeploy-plugin-qt-x86_64.AppImage
-
-      - name: Package AppImage
-        working-directory: "c++ source code"
-        env:
-          APPIMAGE_EXTRACT_AND_RUN: "1"
-          VERSION: "2.1.0"
-        run: |
-          export QMAKE=$(which qmake6 2>/dev/null || which qmake)
-          ./linuxdeploy.AppImage \
-            --appdir AppDir \
-            --plugin qt \
-            --output appimage \
-            --desktop-file AppDir/usr/share/applications/com.artisync.ArtiSync.desktop \
-            --icon-file AppDir/usr/share/icons/hicolor/256x256/apps/com.artisync.ArtiSync.png
-          mv ArtiSync-*.AppImage ArtiSync.AppImage
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ArtiSync-Linux
-          path: "c++ source code/ArtiSync.AppImage"
-
   # ── Attach to GitHub Release (tag pushes only) ────────────────────────────────
   release:
     name: Publish to Release
-    needs: [build-windows, build-linux]
+    needs: [build-windows]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
 
@@ -157,9 +85,7 @@ jobs:
             --generate-notes \
             "artifacts/ArtiSync-Setup.exe" \
             "artifacts/ArtiSync-Portable.zip" \
-            "artifacts/ArtiSync.AppImage" \
           || gh release upload "${{ github.ref_name }}" \
             "artifacts/ArtiSync-Setup.exe" \
             "artifacts/ArtiSync-Portable.zip" \
-            "artifacts/ArtiSync.AppImage" \
             --clobber
