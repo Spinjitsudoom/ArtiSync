@@ -1,4 +1,4 @@
-name: Build Windows & macOS
+name: Build
 
 on:
   push:
@@ -39,21 +39,31 @@ jobs:
         working-directory: "c++ source code"
         run: windeployqt --release build\Release\ArtiSync.exe
 
-      - name: Package as zip
+      - name: Build installer (Inno Setup)
+        working-directory: "c++ source code"
+        run: '& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" ArtiSync.iss'
+
+      - name: Package portable zip
         working-directory: "c++ source code"
         shell: pwsh
-        run: Compress-Archive -Path build\Release\* -DestinationPath ArtiSync-Windows.zip
+        run: Compress-Archive -Path build\Release\* -DestinationPath ArtiSync-Portable.zip
 
-      - name: Upload artifact
+      - name: Upload installer
         uses: actions/upload-artifact@v4
         with:
-          name: ArtiSync-Windows
-          path: "c++ source code/ArtiSync-Windows.zip"
+          name: ArtiSync-Setup
+          path: "c++ source code/ArtiSync-Setup.exe"
 
-  # ── macOS ─────────────────────────────────────────────────────────────────────
-  build-macos:
-    name: macOS
-    runs-on: macos-13        # Intel x86_64 — runs on all Macs via Rosetta
+      - name: Upload portable
+        uses: actions/upload-artifact@v4
+        with:
+          name: ArtiSync-Portable
+          path: "c++ source code/ArtiSync-Portable.zip"
+
+  # ── Linux AppImage ────────────────────────────────────────────────────────────
+  build-linux:
+    name: Linux AppImage
+    runs-on: ubuntu-22.04
 
     steps:
       - uses: actions/checkout@v4
@@ -62,43 +72,70 @@ jobs:
         uses: jurplel/install-qt-action@v3
         with:
           version: '6.7.3'
-          host: mac
+          host: linux
           target: desktop
-          arch: clang_64
+          arch: gcc_64
           cache: true
 
-      - name: Install dependencies via Homebrew
+      - name: Install system dependencies
         run: |
-          brew install pkg-config taglib nlohmann-json
-          # libcurl ships with macOS; nlohmann-json + taglib from Homebrew
-          # avoids compiling them from source via FetchContent
+          sudo apt-get update
+          sudo apt-get install -y cmake g++ libssl-dev libfuse2 patchelf
 
       - name: Configure
         working-directory: "c++ source code"
-        run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_PREFIX_PATH="$(brew --prefix)"
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
         working-directory: "c++ source code"
         run: cmake --build build --parallel
 
-      - name: Package as DMG
+      - name: Set up AppDir
         working-directory: "c++ source code"
         run: |
-          macdeployqt build/ArtiSync.app -dmg
-          mv build/ArtiSync.dmg ArtiSync-macOS.dmg
+          mkdir -p AppDir/usr/bin
+          mkdir -p AppDir/usr/share/applications
+          mkdir -p AppDir/usr/share/icons/hicolor/256x256/apps
+          cp build/ArtiSync AppDir/usr/bin/
+          cp resources/ArtiSync.png \
+             AppDir/usr/share/icons/hicolor/256x256/apps/com.artisync.ArtiSync.png
+          cp flatpak/com.artisync.ArtiSync.desktop \
+             AppDir/usr/share/applications/
+
+      - name: Download linuxdeploy + Qt plugin
+        working-directory: "c++ source code"
+        run: |
+          wget -q -O linuxdeploy.AppImage \
+            https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          wget -q -O linuxdeploy-plugin-qt-x86_64.AppImage \
+            https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
+          chmod +x linuxdeploy.AppImage linuxdeploy-plugin-qt-x86_64.AppImage
+
+      - name: Package AppImage
+        working-directory: "c++ source code"
+        env:
+          APPIMAGE_EXTRACT_AND_RUN: "1"
+          VERSION: "2.1.0"
+        run: |
+          export QMAKE=$(which qmake6 2>/dev/null || which qmake)
+          ./linuxdeploy.AppImage \
+            --appdir AppDir \
+            --plugin qt \
+            --output appimage \
+            --desktop-file AppDir/usr/share/applications/com.artisync.ArtiSync.desktop \
+            --icon-file AppDir/usr/share/icons/hicolor/256x256/apps/com.artisync.ArtiSync.png
+          mv ArtiSync-*.AppImage ArtiSync.AppImage
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ArtiSync-macOS
-          path: "c++ source code/ArtiSync-macOS.dmg"
+          name: ArtiSync-Linux
+          path: "c++ source code/ArtiSync.AppImage"
 
   # ── Attach to GitHub Release (tag pushes only) ────────────────────────────────
   release:
     name: Publish to Release
-    needs: [build-windows, build-macos]
+    needs: [build-windows, build-linux]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
 
@@ -118,9 +155,11 @@ jobs:
           gh release create "${{ github.ref_name }}" \
             --title "ArtiSync ${{ github.ref_name }}" \
             --generate-notes \
-            artifacts/ArtiSync-Windows.zip \
-            artifacts/ArtiSync-macOS.dmg \
+            "artifacts/ArtiSync-Setup.exe" \
+            "artifacts/ArtiSync-Portable.zip" \
+            "artifacts/ArtiSync.AppImage" \
           || gh release upload "${{ github.ref_name }}" \
-            artifacts/ArtiSync-Windows.zip \
-            artifacts/ArtiSync-macOS.dmg \
+            "artifacts/ArtiSync-Setup.exe" \
+            "artifacts/ArtiSync-Portable.zip" \
+            "artifacts/ArtiSync.AppImage" \
             --clobber

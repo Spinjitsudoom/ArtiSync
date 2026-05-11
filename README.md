@@ -8,7 +8,8 @@ A cross-platform music library organiser that fetches metadata from **Spotify**,
 
 | Package | Platform | Description |
 |---|---|---|
-| `ArtiSync-Windows.zip` | Windows 10/11 | Extract and run `ArtiSync.exe` — Qt6 DLLs bundled |
+| `ArtiSync-Setup.exe` | Windows 10/11 | Installer — adds Start Menu entry and optional desktop shortcut |
+| `ArtiSync-Portable.zip` | Windows 10/11 | Portable — extract and run `ArtiSync.exe`, no install needed |
 | `ArtiSync.AppImage` | Linux (any) | Self-contained AppImage — download, `chmod +x`, run |
 | `ArtiSync.flatpak` | Linux (Flatpak) | Install via `flatpak install` |
 
