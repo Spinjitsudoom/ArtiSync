@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>com.musicmanager.MusicManager</id>
-  <name>Music Manager Ultimate</name>
+  <id>com.artisync.ArtiSync</id>
+  <name>ArtiSync</name>
   <summary>Organize and tag your music library</summary>
   <description>
     <p>
@@ -9,7 +9,7 @@
       downloads cover art, and converts between audio formats.
     </p>
   </description>
-  <developer id="com.musicmanager">
+  <developer id="com.artisync">
     <name>Etienne Axiak</name>
   </developer>
   <metadata_license>MIT</metadata_license>

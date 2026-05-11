@@ -35,12 +35,12 @@ struct ThemePalette {
 
 // ── Main window ───────────────────────────────────────────────────────────────
 
-class MusicManager : public QMainWindow {
+class ArtiSync : public QMainWindow {
     Q_OBJECT
 
 public:
-    explicit MusicManager(QWidget* parent = nullptr);
-    ~MusicManager() override = default;
+    explicit ArtiSync(QWidget* parent = nullptr);
+    ~ArtiSync() override = default;
 
     static QMap<QString, ThemePalette> themes();
 

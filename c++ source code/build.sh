@@ -56,7 +56,7 @@ rm -rf "$APPDIR"
 mkdir -p "$APPDIR/usr/bin"
 mkdir -p "$APPDIR/usr/plugins/imageformats"
 
-cp "$CMAKE_BUILD/MusicManager" "$APPDIR/usr/bin/"
+cp "$CMAKE_BUILD/ArtiSync" "$APPDIR/usr/bin/"
 
 # Bundle the JPEG imageformats plugin (libqjpeg.so depends only on system
 # Qt6 libs + libjpeg, which are guaranteed on any Qt6-capable system)
@@ -66,19 +66,19 @@ for plugin in libqjpeg.so libqgif.so libqwebp.so libqsvg.so; do
         cp "$SYSTEM_IMAGEFORMATS/$plugin" "$APPDIR/usr/plugins/imageformats/"
 done
 
-cp "$SOURCE_DIR/resources/MusicManager.png" \
-   "$APPDIR/com.musicmanager.MusicManager.png"
+cp "$SOURCE_DIR/resources/ArtiSync.png" \
+   "$APPDIR/com.artisync.ArtiSync.png"
 
-cat > "$APPDIR/com.musicmanager.MusicManager.desktop" <<'DESKTOP'
+cat > "$APPDIR/com.artisync.ArtiSync.desktop" <<'DESKTOP'
 [Desktop Entry]
 Type=Application
-Name=Music Manager Ultimate
+Name=ArtiSync
 Comment=Organize and tag your music library
-Exec=MusicManager
-Icon=com.musicmanager.MusicManager
+Exec=ArtiSync
+Icon=com.artisync.ArtiSync
 Categories=AudioVideo;Audio;Music;
 Terminal=false
-StartupWMClass=MusicManager
+StartupWMClass=ArtiSync
 DESKTOP
 
 cat > "$APPDIR/AppRun" <<'APPRUN'
@@ -90,7 +90,7 @@ HERE="${SELF%/*}"
 export QT_PLUGIN_PATH="$HERE/usr/plugins:/usr/lib64/qt6/plugins"
 export QT_QPA_PLATFORM_PLUGIN_PATH=/usr/lib64/qt6/plugins/platforms
 
-exec "$HERE/usr/bin/MusicManager" "$@"
+exec "$HERE/usr/bin/ArtiSync" "$@"
 APPRUN
 chmod +x "$APPDIR/AppRun"
 
@@ -98,12 +98,12 @@ chmod +x "$APPDIR/AppRun"
 echo ""
 echo "=== Packaging AppImage ==="
 cd "$BUILD_DIR"
-"$APPIMAGETOOL" "$APPDIR" "$BUILD_DIR/MusicManager-x86_64.AppImage" 2>&1
+"$APPIMAGETOOL" "$APPDIR" "$BUILD_DIR/ArtiSync-x86_64.AppImage" 2>&1
 
 # ── Move to final result ──────────────────────────────────────────────────────
 echo ""
 echo "=== Moving AppImage to 'final result' ==="
-mv "$BUILD_DIR/MusicManager-x86_64.AppImage" "$FINAL_DIR/MusicManager.AppImage"
-chmod +x "$FINAL_DIR/MusicManager.AppImage"
+mv "$BUILD_DIR/ArtiSync-x86_64.AppImage" "$FINAL_DIR/ArtiSync.AppImage"
+chmod +x "$FINAL_DIR/ArtiSync.AppImage"
 echo ""
-echo "Done! AppImage is at: $FINAL_DIR/MusicManager.AppImage"
+echo "Done! AppImage is at: $FINAL_DIR/ArtiSync.AppImage"

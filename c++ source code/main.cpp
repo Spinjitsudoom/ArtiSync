@@ -7,12 +7,12 @@ int main(int argc, char* argv[]) {
     curl_global_init(CURL_GLOBAL_DEFAULT);
 
     QApplication app(argc, argv);
-    app.setApplicationName("Music Manager Ultimate");
+    app.setApplicationName("ArtiSync");
     app.setApplicationVersion("2.1.0");
-    app.setDesktopFileName("com.musicmanager.MusicManager");
-    app.setWindowIcon(QIcon(":/MusicManager.png"));
+    app.setDesktopFileName("com.artisync.ArtiSync");
+    app.setWindowIcon(QIcon(":/ArtiSync.png"));
 
-    MusicManager window;
+    ArtiSync window;
     window.show();
 
     int ret = app.exec();

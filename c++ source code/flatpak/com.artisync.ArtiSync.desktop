@@ -1,9 +1,9 @@
 [Desktop Entry]
 Type=Application
-Name=Music Manager Ultimate
+Name=ArtiSync
 Comment=Organize and tag your music library
-Exec=MusicManager
-Icon=com.musicmanager.MusicManager
+Exec=ArtiSync
+Icon=com.artisync.ArtiSync
 Categories=AudioVideo;Audio;Music;
 Terminal=false
-StartupWMClass=MusicManager
+StartupWMClass=ArtiSync

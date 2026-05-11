@@ -73,16 +73,30 @@ def _ctk_scrollbar(parent, orient, command, c):
                             button_hover_color=c["accent"])
 
 
-class MusicManagerApp:
+class ArtiSyncApp:
     VERSION  = "v2.1.0"
     ART_SIZE = 200
 
     def __init__(self, root):
         self.root = root
-        self.root.title(f"Music Manager Ultimate {self.VERSION}")
+        self.root.title(f"ArtiSync {self.VERSION}")
         self.root.geometry("1400x980")
+        try:
+            _icon_path = Path(__file__).parent / "ArtiSync.png"
+            if _icon_path.exists() and PIL_AVAILABLE:
+                _icon_img = PilImage.open(_icon_path).resize((256, 256), _RESAMPLE)
+                import io as _io
+                _buf = _io.BytesIO()
+                _icon_img.save(_buf, format="PNG")
+                _buf.seek(0)
+                _tk_icon = tk.PhotoImage(data=_buf.read())
+                self.root.iconphoto(True, _tk_icon)
+        except Exception:
+            pass
 
-        self.config_file = Path("music_config.json")
+        _config_dir = Path.home() / "Documents" / "ArtiSync"
+        _config_dir.mkdir(parents=True, exist_ok=True)
+        self.config_file = _config_dir / "music_config.json"
         self.spot_engine = SpotifyEngine()
         self.remux_engine = RemuxEngine()
 
@@ -2243,12 +2257,12 @@ if __name__ == "__main__":
     ctk.set_appearance_mode("dark")
     ctk.set_default_color_theme("dark-blue")
     root = ctk.CTk()
-    MusicManagerApp(root)
+    ArtiSyncApp(root)
     root.mainloop()
 
 if __name__ == "__main__":
     ctk.set_appearance_mode("dark")
     ctk.set_default_color_theme("dark-blue")
     root = ctk.CTk()
-    MusicManagerApp(root)
+    ArtiSyncApp(root)
     root.mainloop()

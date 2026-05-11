@@ -1,6 +1,6 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
     <qresource prefix="/">
-        <file>MusicManager.png</file>
+        <file>ArtiSync.png</file>
     </qresource>
 </RCC>

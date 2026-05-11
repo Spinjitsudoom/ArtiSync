@@ -1,4 +1,4 @@
-# Music Manager Ultimate
+# ArtiSync
 
 A cross-platform music library organiser that fetches metadata from **Spotify**, renames your files, writes embedded tags, downloads cover art, and optionally converts between audio formats — available as both a **Python** desktop app and a compiled **C++ / Qt6** application.
 
@@ -8,9 +8,9 @@ A cross-platform music library organiser that fetches metadata from **Spotify**,
 
 | Package | Platform | Description |
 |---|---|---|
-| `MusicManager-Windows.zip` | Windows 10/11 | Extract and run `MusicManager.exe` — Qt6 DLLs bundled |
-| `MusicManager.AppImage` | Linux (any) | Self-contained AppImage — download, `chmod +x`, run |
-| `MusicManager.flatpak` | Linux (Flatpak) | Install via `flatpak install` |
+| `ArtiSync-Windows.zip` | Windows 10/11 | Extract and run `ArtiSync.exe` — Qt6 DLLs bundled |
+| `ArtiSync.AppImage` | Linux (any) | Self-contained AppImage — download, `chmod +x`, run |
+| `ArtiSync.flatpak` | Linux (Flatpak) | Install via `flatpak install` |
 
 See the [Releases](../../releases) section for the latest builds.
 
@@ -87,15 +87,15 @@ sudo apt install qt6-base qt6-base-gui
 
 Then run:
 ```bash
-chmod +x MusicManager.AppImage
-./MusicManager.AppImage
+chmod +x ArtiSync.AppImage
+./ArtiSync.AppImage
 ```
 
 ## Installing the Flatpak
 
 ```bash
-flatpak install --user MusicManager.flatpak
-flatpak run com.musicmanager.MusicManager
+flatpak install --user ArtiSync.flatpak
+flatpak run com.artisync.ArtiSync
 ```
 
 ---
@@ -201,7 +201,7 @@ sudo apt install cmake g++ qt6-base-dev libssl-dev
 cd "c++ source code"
 cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j$(nproc)
-./build/MusicManager
+./build/ArtiSync
 ```
 
 ### Build the AppImage
@@ -211,7 +211,7 @@ Requires an ostree-based Fedora system (Silverblue / Kinoite) with Qt6 devel hea
 ```bash
 cd "c++ source code"
 bash build.sh
-# Output: ../final result/MusicManager.AppImage
+# Output: ../final result/ArtiSync.AppImage
 ```
 
 ### Build the Flatpak
@@ -222,7 +222,7 @@ Requires `flatpak-builder` and `org.kde.Sdk//6.10`:
 flatpak install flathub org.kde.Sdk//6.10 org.kde.Platform//6.10
 cd "c++ source code"
 bash flatpak_build.sh
-# Output: ../Flatpak final result/MusicManager.flatpak
+# Output: ../Flatpak final result/ArtiSync.flatpak
 ```
 
 ### C++ module overview
@@ -242,7 +242,7 @@ bash flatpak_build.sh
 | `CMakeLists.txt` | Build definition; detects system libs, falls back to FetchContent |
 | `build.sh` | One-shot AppImage build script |
 | `flatpak_build.sh` | One-shot Flatpak build script |
-| `flatpak/com.musicmanager.MusicManager.yml` | Flatpak manifest (KDE Platform 6.10) |
+| `flatpak/com.artisync.ArtiSync.yml` | Flatpak manifest (KDE Platform 6.10) |
 
 ---
 

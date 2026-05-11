@@ -7,11 +7,12 @@
 #include <sstream>
 #include <stdexcept>
 #include <nlohmann/json.hpp>
+#include <QProcess>
+#include <QStringList>
+#include <QStandardPaths>
 
 #ifdef _WIN32
   #include <windows.h>
-  #define popen  _popen
-  #define pclose _pclose
 #else
   #include <unistd.h>
 #endif
@@ -74,6 +75,8 @@ std::string RemuxEngine::findExecutable(const std::string& name) const {
     if (!result.empty() && result.back() == '\n') result.pop_back();
     return result;
 #endif
+    QString path = QStandardPaths::findExecutable(QString::fromStdString(name));
+    return path.toStdString();
 }
 
 // ── Constructor ───────────────────────────────────────────────────────────────
@@ -150,37 +153,23 @@ std::string RemuxEngine::convert(const std::string& srcPath,
     if (!fs::exists(srcPath)) return "Source file not found: " + srcPath;
 
     auto args = buildCommand(srcPath, dstPath, srcExt, dstExt, quality);
+    if (args.empty()) return "Failed to build FFmpeg command";
 
-    // Build shell command string
-    std::string cmd;
-    for (auto& a : args) {
-#ifdef _WIN32
-        cmd += "\"" + a + "\" ";
-#else
-        // Simple quoting — single-quote each argument
-        cmd += "'";
-        for (char c : a) {
-            if (c == '\'') cmd += "'\\''";
-            else           cmd += c;
-        }
-        cmd += "' ";
-#endif
-    }
-    cmd += " 2>&1";  // redirect stderr so we can capture it
+    QString prog = QString::fromStdString(args[0]);
+    QStringList qArgs;
+    for (size_t i = 1; i < args.size(); ++i)
+        qArgs << QString::fromStdString(args[i]);
 
-    // Run
-    std::string output;
-    FILE* pipe = popen(cmd.c_str(), "r");
-    if (!pipe) return "Failed to launch FFmpeg";
-    char buf[256];
-    while (fgets(buf, sizeof(buf), pipe))
-        output += buf;
-    int ret = pclose(pipe);
+    QProcess proc;
+    proc.setProcessChannelMode(QProcess::MergedChannels);
+    proc.start(prog, qArgs);
 
-    if (ret != 0) {
-        // Return last ~200 chars of output
+    if (!proc.waitForFinished(-1)) return "FFmpeg process timed out or failed";
+
+    if (proc.exitCode() != 0) {
+        std::string output = proc.readAll().toStdString();
         if (output.size() > 200) output = output.substr(output.size() - 200);
-        return output;
+        return output.empty() ? "FFmpeg failed with exit code " + std::to_string(proc.exitCode()) : output;
     }
 
     if (deleteSource && fs::exists(dstPath)) {

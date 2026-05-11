@@ -35,6 +35,7 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QDirIterator>
+#include <QStandardPaths>
 
 #include <filesystem>
 #include <set>
@@ -45,7 +46,7 @@ namespace fs = std::filesystem;
 
 // ── Theme definitions ─────────────────────────────────────────────────────────
 
-QMap<QString, ThemePalette> MusicManager::themes() {
+QMap<QString, ThemePalette> ArtiSync::themes() {
     return {
         {"Dark",     {"#121212","#e0e0e0","#2d2d2d","#1e1e1e","#0078d4","#333333"}},
         {"Light",    {"#ffffff","#202124","#f1f3f4","#f8f9fa","#1a73e8","#dadce0"}},
@@ -61,12 +62,12 @@ QMap<QString, ThemePalette> MusicManager::themes() {
 
 // ── Constructor ───────────────────────────────────────────────────────────────
 
-MusicManager::MusicManager(QWidget* parent)
+ArtiSync::ArtiSync(QWidget* parent)
     : QMainWindow(parent)
     , m_engine(new SpotifyEngine())
     , m_remux(new RemuxEngine())
 {
-    setWindowTitle("Music Manager Ultimate v2.1.0");
+    setWindowTitle("ArtiSync v2.1.0");
     resize(1400, 980);
 
     loadConfig();
@@ -79,13 +80,16 @@ MusicManager::MusicManager(QWidget* parent)
 
     if (!m_rootDir.isEmpty() && QDir(m_rootDir).exists()) {
         m_rootPathEdit->setText(m_rootDir);
-        onArtistSelected(0);
+        QDir d(m_rootDir);
+        QStringList dirs = d.entryList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
+        m_artistCombo->addItems(dirs);
+        if (!dirs.isEmpty()) onArtistSelected(0);
     }
 }
 
 // ── UI Setup ──────────────────────────────────────────────────────────────────
 
-void MusicManager::setupUI() {
+void ArtiSync::setupUI() {
     auto* central = new QWidget(this);
     setCentralWidget(central);
     auto* mainLayout = new QVBoxLayout(central);
@@ -99,7 +103,7 @@ void MusicManager::setupUI() {
 
     auto* browseBtn = new QPushButton("Browse");
     browseBtn->setFixedWidth(80);
-    connect(browseBtn, &QPushButton::clicked, this, &MusicManager::onBrowseRoot);
+    connect(browseBtn, &QPushButton::clicked, this, &ArtiSync::onBrowseRoot);
     tbLayout->addWidget(browseBtn);
 
     m_rootPathEdit = new QLineEdit;
@@ -108,7 +112,7 @@ void MusicManager::setupUI() {
     m_artistCombo = new QComboBox;
     m_artistCombo->setMinimumWidth(190);
     connect(m_artistCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
-            this, &MusicManager::onArtistSelected);
+            this, &ArtiSync::onArtistSelected);
     tbLayout->addWidget(m_artistCombo);
 
     tbLayout->addWidget(new QLabel("›"));
@@ -116,12 +120,12 @@ void MusicManager::setupUI() {
     m_albumCombo = new QComboBox;
     m_albumCombo->setMinimumWidth(170);
     connect(m_albumCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
-            this, &MusicManager::onAlbumSelected);
+            this, &ArtiSync::onAlbumSelected);
     tbLayout->addWidget(m_albumCombo);
 
     auto* batchBtn = new QPushButton("Batch");
     batchBtn->setFixedWidth(60);
-    connect(batchBtn, &QPushButton::clicked, this, &MusicManager::onBatchPreview);
+    connect(batchBtn, &QPushButton::clicked, this, &ArtiSync::onBatchPreview);
     tbLayout->addWidget(batchBtn);
 
     mainLayout->addWidget(toolbar);
@@ -189,18 +193,18 @@ void MusicManager::setupUI() {
 
     auto* convertBtn = new QPushButton("Convert");
     convertBtn->setFixedWidth(70);
-    connect(convertBtn, &QPushButton::clicked, this, &MusicManager::onShowConvertDialog);
+    connect(convertBtn, &QPushButton::clicked, this, &ArtiSync::onShowConvertDialog);
 
     auto* execBtn = new QPushButton("Execute Rename + Tag");
-    connect(execBtn, &QPushButton::clicked, this, &MusicManager::onExecuteRenameClicked);
+    connect(execBtn, &QPushButton::clicked, this, &ArtiSync::onExecuteRenameClicked);
 
     auto* refreshBtn = new QPushButton("Refresh");
     refreshBtn->setFixedWidth(70);
-    connect(refreshBtn, &QPushButton::clicked, this, &MusicManager::onRefreshPreview);
+    connect(refreshBtn, &QPushButton::clicked, this, &ArtiSync::onRefreshPreview);
 
     auto* undoBtn = new QPushButton("Undo");
     undoBtn->setFixedWidth(60);
-    connect(undoBtn, &QPushButton::clicked, this, &MusicManager::onUndoRename);
+    connect(undoBtn, &QPushButton::clicked, this, &ArtiSync::onUndoRename);
 
     footLayout->addWidget(convertBtn);
     footLayout->addWidget(execBtn);
@@ -210,7 +214,7 @@ void MusicManager::setupUI() {
     mainLayout->addWidget(footer);
 }
 
-void MusicManager::buildSidebar(QWidget* parent) {
+void ArtiSync::buildSidebar(QWidget* parent) {
     auto* sidebar = new QWidget(parent);
     sidebar->setFixedWidth(360);
     auto* layout = new QVBoxLayout(sidebar);
@@ -226,13 +230,13 @@ void MusicManager::buildSidebar(QWidget* parent) {
     m_sidebar->setIconSize(QSize(64, 64));
     m_sidebar->setSpacing(1);
     connect(m_sidebar, &QListWidget::itemClicked,
-            this, &MusicManager::onSidebarItemClicked);
+            this, &ArtiSync::onSidebarItemClicked);
     layout->addWidget(m_sidebar, 1);
 
     parent->layout()->addWidget(sidebar);
 }
 
-void MusicManager::buildCentre(QWidget* centre) {
+void ArtiSync::buildCentre(QWidget* centre) {
     auto* layout = new QVBoxLayout(centre);
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -271,7 +275,7 @@ void MusicManager::buildCentre(QWidget* centre) {
     layout->addWidget(m_tabWidget, 1);
 }
 
-void MusicManager::buildArtPanel(QWidget* parent) {
+void ArtiSync::buildArtPanel(QWidget* parent) {
     auto* panel = new QWidget(parent);
     panel->setFixedWidth(220);
     auto* layout = new QVBoxLayout(panel);
@@ -343,7 +347,7 @@ void MusicManager::buildArtPanel(QWidget* parent) {
     layout->addWidget(chipRow);
 
     auto* fetchArtBtn = new QPushButton("Fetch Artwork");
-    connect(fetchArtBtn, &QPushButton::clicked, this, &MusicManager::onFetchArt);
+    connect(fetchArtBtn, &QPushButton::clicked, this, &ArtiSync::onFetchArt);
     layout->addWidget(fetchArtBtn);
 
     layout->addStretch();
@@ -352,24 +356,24 @@ void MusicManager::buildArtPanel(QWidget* parent) {
 
 // ── Menu ──────────────────────────────────────────────────────────────────────
 
-void MusicManager::setupMenuBar() {
+void ArtiSync::setupMenuBar() {
     auto* mb   = menuBar();
     auto* file = mb->addMenu("File");
 
-    file->addAction("Settings…", this, &MusicManager::onOpenSettings);
+    file->addAction("Settings…", this, &ArtiSync::onOpenSettings);
 
     auto* themeMenu = file->addMenu("Theme");
     for (auto& name : themes().keys())
         themeMenu->addAction(name, [this, name]{ onSwitchTheme(name); });
 
-    file->addAction("Undo Last Rename", this, &MusicManager::onUndoRename);
+    file->addAction("Undo Last Rename", this, &ArtiSync::onUndoRename);
     file->addSeparator();
     file->addAction("Exit", qApp, &QApplication::quit);
 }
 
 // ── Theme ─────────────────────────────────────────────────────────────────────
 
-void MusicManager::applyTheme(const QString& name) {
+void ArtiSync::applyTheme(const QString& name) {
     m_currentTheme = name;
     auto th = themes();
     if (!th.contains(name)) return;
@@ -378,7 +382,7 @@ void MusicManager::applyTheme(const QString& name) {
     saveConfig();
 }
 
-QString MusicManager::stylesheet(const ThemePalette& p) const {
+QString ArtiSync::stylesheet(const ThemePalette& p) const {
     return QString(R"(
 QMainWindow, QWidget {
     background: %1; color: %2;
@@ -419,7 +423,7 @@ QFrame[frameShape="4"], QFrame[frameShape="5"] { color: %6; }
 
 // ── Status helpers ────────────────────────────────────────────────────────────
 
-void MusicManager::updateStatusDot(QLabel* lbl, const QString& text,
+void ArtiSync::updateStatusDot(QLabel* lbl, const QString& text,
                                     const QString& color)
 {
     lbl->setText(text);
@@ -427,7 +431,7 @@ void MusicManager::updateStatusDot(QLabel* lbl, const QString& text,
         lbl->setStyleSheet("color:" + color + "; font-size:9pt;");
 }
 
-void MusicManager::setProgress(int matched, int total) {
+void ArtiSync::setProgress(int matched, int total) {
     int pct = total > 0 ? (100 * matched / total) : 0;
     m_progressBar->setValue(pct);
     m_progressLabel->setText(
@@ -437,7 +441,7 @@ void MusicManager::setProgress(int matched, int total) {
 
 // ── Art panel helpers ─────────────────────────────────────────────────────────
 
-void MusicManager::updateArtPanel(const QByteArray& bytes) {
+void ArtiSync::updateArtPanel(const QByteArray& bytes) {
     m_currentArtBytes = bytes;
     if (bytes.isEmpty()) {
         m_artLabel->setPixmap({});
@@ -457,7 +461,7 @@ void MusicManager::updateArtPanel(const QByteArray& bytes) {
     m_artLabel->setText("");
 }
 
-void MusicManager::updateMetaPanel(const ReleaseMetadata& meta) {
+void ArtiSync::updateMetaPanel(const ReleaseMetadata& meta) {
     m_currentMeta = meta;
     auto set = [&](const char* prop, const std::string& val) {
         if (auto* lbl = qobject_cast<QLabel*>(
@@ -472,7 +476,7 @@ void MusicManager::updateMetaPanel(const ReleaseMetadata& meta) {
 
 // ── Sidebar ───────────────────────────────────────────────────────────────────
 
-void MusicManager::populateSidebar(const QVector<Release>& releases) {
+void ArtiSync::populateSidebar(const QVector<Release>& releases) {
     m_sidebar->clear();
     m_sidebarMap.clear();
     m_knownReleases = releases;
@@ -507,7 +511,7 @@ void MusicManager::populateSidebar(const QVector<Release>& releases) {
     }).detach();
 }
 
-void MusicManager::highlightSidebarRow(const QString& releaseId) {
+void ArtiSync::highlightSidebarRow(const QString& releaseId) {
     for (int i = 0; i < m_sidebar->count(); ++i) {
         auto* item = m_sidebar->item(i);
         bool sel = item->data(Qt::UserRole).toString() == releaseId;
@@ -515,7 +519,7 @@ void MusicManager::highlightSidebarRow(const QString& releaseId) {
     }
 }
 
-void MusicManager::loadSidebarThumbs(QVector<Release> releases, int generation) {
+void ArtiSync::loadSidebarThumbs(QVector<Release> releases, int generation) {
     for (int i = 0; i < releases.size(); ++i) {
         if (m_sidebarGeneration.load() != generation) return;
 
@@ -552,7 +556,7 @@ void MusicManager::loadSidebarThumbs(QVector<Release> releases, int generation) 
     }
 }
 
-void MusicManager::onSidebarItemClicked(QListWidgetItem* item) {
+void ArtiSync::onSidebarItemClicked(QListWidgetItem* item) {
     QString rid = item->data(Qt::UserRole).toString();
     m_currentReleaseId = rid;
     updateStatusDot(m_statusDetect,
@@ -571,7 +575,7 @@ void MusicManager::onSidebarItemClicked(QListWidgetItem* item) {
 
 // ── Artist / Album selection ──────────────────────────────────────────────────
 
-void MusicManager::onBrowseRoot() {
+void ArtiSync::onBrowseRoot() {
     QString path = QFileDialog::getExistingDirectory(this, "Select Music Root");
     if (path.isEmpty()) return;
     m_rootDir = path;
@@ -585,7 +589,7 @@ void MusicManager::onBrowseRoot() {
     if (!dirs.isEmpty()) onArtistSelected(0);
 }
 
-void MusicManager::onArtistSelected(int /*index*/) {
+void ArtiSync::onArtistSelected(int /*index*/) {
     QString artist = m_artistCombo->currentText();
     if (artist.isEmpty()) return;
     QString artistPath = m_rootDir + "/" + artist;
@@ -598,7 +602,7 @@ void MusicManager::onArtistSelected(int /*index*/) {
     autoDetectArtist(artist);
 }
 
-void MusicManager::onAlbumSelected(int /*index*/) {
+void ArtiSync::onAlbumSelected(int /*index*/) {
     QString album = m_albumCombo->currentText();
     if (album.isEmpty() || m_artistCombo->currentText().isEmpty()) return;
     if (!m_knownReleases.isEmpty())
@@ -607,7 +611,7 @@ void MusicManager::onAlbumSelected(int /*index*/) {
 
 // ── Auto-detect ───────────────────────────────────────────────────────────────
 
-void MusicManager::autoDetectArtist(const QString& name) {
+void ArtiSync::autoDetectArtist(const QString& name) {
     if (!m_engine->isConfigured()) {
         updateStatusDot(m_statusDetect, "Add Spotify creds in Settings", "#e74c3c");
         return;
@@ -654,7 +658,7 @@ void MusicManager::autoDetectArtist(const QString& name) {
     }).detach();
 }
 
-void MusicManager::onArtistDetectDone(const QString& artistId,
+void ArtiSync::onArtistDetectDone(const QString& artistId,
                                        const QString& artistName,
                                        const QVector<Release>& releases)
 {
@@ -666,7 +670,7 @@ void MusicManager::onArtistDetectDone(const QString& artistId,
     populateSidebar(releases);
 }
 
-void MusicManager::autoDetectAlbum(const QString& name) {
+void ArtiSync::autoDetectAlbum(const QString& name) {
     if (m_knownReleases.isEmpty()) return;
 
     std::vector<std::string> titles;
@@ -701,9 +705,9 @@ void MusicManager::autoDetectAlbum(const QString& name) {
     }
 }
 
-void MusicManager::onAlbumDetectDone(const QString& /*releaseId*/) {}
+void ArtiSync::onAlbumDetectDone(const QString& /*releaseId*/) {}
 
-void MusicManager::loadMetaAndArt(const QString& releaseId) {
+void ArtiSync::loadMetaAndArt(const QString& releaseId) {
     std::thread([this, rid = releaseId.toStdString()]() {
         auto meta = m_engine->getReleaseMetadata(rid);
         auto art  = m_engine->getCoverArtBytes(rid);
@@ -715,15 +719,15 @@ void MusicManager::loadMetaAndArt(const QString& releaseId) {
     }).detach();
 }
 
-void MusicManager::onMetaLoaded(const ReleaseMetadata& meta) {
+void ArtiSync::onMetaLoaded(const ReleaseMetadata& meta) {
     updateMetaPanel(meta);
 }
 
-void MusicManager::onArtLoaded(const QByteArray& bytes) {
+void ArtiSync::onArtLoaded(const QByteArray& bytes) {
     updateArtPanel(bytes);
 }
 
-void MusicManager::onFetchArt() {
+void ArtiSync::onFetchArt() {
     if (m_currentReleaseId.isEmpty()) {
         QMessageBox::warning(this, "No Release", "Select a release first.");
         return;
@@ -739,7 +743,7 @@ void MusicManager::onFetchArt() {
 
 // ── Preview ───────────────────────────────────────────────────────────────────
 
-void MusicManager::onRefreshPreview() {
+void ArtiSync::onRefreshPreview() {
     if (m_currentTracks.isEmpty()) return;
     QString albumPath = m_rootDir + "/" + m_artistCombo->currentText() +
                         "/" + m_albumCombo->currentText();
@@ -785,7 +789,7 @@ void MusicManager::onRefreshPreview() {
     m_batchData.clear();
 }
 
-void MusicManager::rebuildTrackRows(const QVector<MatchResult>& epData,
+void ArtiSync::rebuildTrackRows(const QVector<MatchResult>& epData,
                                      const QVector<Track>& missing)
 {
     // Clear old rows
@@ -816,7 +820,7 @@ void MusicManager::rebuildTrackRows(const QVector<MatchResult>& epData,
     }
 }
 
-void MusicManager::addTrackRow(const Track& track, const MatchResult* match) {
+void ArtiSync::addTrackRow(const Track& track, const MatchResult* match) {
     bool unmatched = (match == nullptr);
     bool warning   = (!unmatched) && match->score < 80;
 
@@ -883,7 +887,7 @@ void MusicManager::addTrackRow(const Track& track, const MatchResult* match) {
 
 // ── Batch ─────────────────────────────────────────────────────────────────────
 
-void MusicManager::onBatchPreview() {
+void ArtiSync::onBatchPreview() {
     if (m_currentArtistId.isEmpty()) {
         QMessageBox::warning(this, "No Artist", "Select an artist first.");
         return;
@@ -908,7 +912,7 @@ void MusicManager::onBatchPreview() {
     }).detach();
 }
 
-void MusicManager::onBatchDone(const QVector<BatchResult>& results) {
+void ArtiSync::onBatchDone(const QVector<BatchResult>& results) {
     m_batchData     = results;
     m_episodesData.clear();
 
@@ -939,7 +943,7 @@ void MusicManager::onBatchDone(const QVector<BatchResult>& results) {
 
 // ── Execute ───────────────────────────────────────────────────────────────────
 
-void MusicManager::onExecuteRenameClicked() {
+void ArtiSync::onExecuteRenameClicked() {
     if (m_episodesData.isEmpty() && m_batchData.isEmpty()) {
         QMessageBox::information(this, "Nothing to do", "Run a preview first.");
         return;
@@ -947,7 +951,7 @@ void MusicManager::onExecuteRenameClicked() {
     showReviewDialog();
 }
 
-void MusicManager::showReviewDialog() {
+void ArtiSync::showReviewDialog() {
     // Collect unmatched files
     QString albumPath = m_rootDir + "/" + m_artistCombo->currentText() +
                         "/" + m_albumCombo->currentText();
@@ -1057,7 +1061,7 @@ void MusicManager::showReviewDialog() {
     }
 }
 
-void MusicManager::executeRename() {
+void ArtiSync::executeRename() {
     using PairTuple = std::tuple<QString,QString,QString,int,int>;
     QVector<PairTuple> pairs;
 
@@ -1191,7 +1195,7 @@ void MusicManager::executeRename() {
 // ── Pre-remux helper ──────────────────────────────────────────────────────────
 
 QPair<QVector<std::tuple<QString,QString,QString,int,int>>, int>
-MusicManager::runPreRemux(
+ArtiSync::runPreRemux(
     QVector<std::tuple<QString,QString,QString,int,int>>& pairs)
 {
     static const QStringList skip = {".mp3", ".flac"};
@@ -1231,7 +1235,7 @@ MusicManager::runPreRemux(
 
 // ── Undo ──────────────────────────────────────────────────────────────────────
 
-void MusicManager::onUndoRename() {
+void ArtiSync::onUndoRename() {
     if (m_renameHistory.isEmpty()) return;
     for (auto& [newp, oldp] : m_renameHistory)
         if (QFile::exists(newp)) QFile::rename(newp, oldp);
@@ -1241,7 +1245,7 @@ void MusicManager::onUndoRename() {
 
 // ── Convert dialog ────────────────────────────────────────────────────────────
 
-void MusicManager::onShowConvertDialog() {
+void ArtiSync::onShowConvertDialog() {
     QString albumPath = m_rootDir + "/" + m_artistCombo->currentText() +
                         "/" + m_albumCombo->currentText();
     if (!QDir(albumPath).exists()) {
@@ -1396,7 +1400,7 @@ void MusicManager::onShowConvertDialog() {
 
 // ── Settings ──────────────────────────────────────────────────────────────────
 
-void MusicManager::onOpenSettings() {
+void ArtiSync::onOpenSettings() {
     auto* dlg = new QDialog(this);
     dlg->setWindowTitle("Settings");
     dlg->setFixedSize(480, 580);
@@ -1520,13 +1524,20 @@ void MusicManager::onOpenSettings() {
     dlg->exec();
 }
 
-void MusicManager::onSwitchTheme(const QString& name) {
+void ArtiSync::onSwitchTheme(const QString& name) {
     applyTheme(name);
 }
 
 // ── Config persistence ────────────────────────────────────────────────────────
 
-void MusicManager::saveConfig() {
+static QString configPath() {
+    QString dir = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation)
+                  + "/ArtiSync";
+    QDir().mkpath(dir);
+    return dir + "/music_config.json";
+}
+
+void ArtiSync::saveConfig() {
     QJsonObject obj;
     obj["path"]                   = m_rootDir;
     obj["theme"]                  = m_currentTheme;
@@ -1536,13 +1547,13 @@ void MusicManager::saveConfig() {
     obj["auto_remux_target"]      = m_autoRemuxTarget;
     obj["auto_remux_quality"]     = m_autoRemuxQuality;
     obj["auto_remux_delete_source"] = m_autoRemuxDelSrc;
-    QFile f("music_config.json");
+    QFile f(configPath());
     if (f.open(QIODevice::WriteOnly))
         f.write(QJsonDocument(obj).toJson(QJsonDocument::Indented));
 }
 
-void MusicManager::loadConfig() {
-    QFile f("music_config.json");
+void ArtiSync::loadConfig() {
+    QFile f(configPath());
     if (!f.open(QIODevice::ReadOnly)) return;
     auto obj = QJsonDocument::fromJson(f.readAll()).object();
     m_rootDir             = obj.value("path").toString();
