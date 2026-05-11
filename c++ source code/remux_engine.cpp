@@ -2,8 +2,6 @@
 #include <filesystem>
 #include <algorithm>
 #include <cctype>
-#include <cstdlib>
-#include <array>
 #include <sstream>
 #include <stdexcept>
 #include <nlohmann/json.hpp>
@@ -11,11 +9,6 @@
 #include <QStringList>
 #include <QStandardPaths>
 
-#ifdef _WIN32
-  #include <windows.h>
-#else
-  #include <unistd.h>
-#endif
 
 namespace fs = std::filesystem;
 
@@ -57,24 +50,6 @@ std::string RemuxEngine::normalizeExt(const std::string& raw) const {
 }
 
 std::string RemuxEngine::findExecutable(const std::string& name) const {
-#ifdef _WIN32
-    // Search PATH on Windows
-    char buf[MAX_PATH];
-    if (SearchPathA(nullptr, name.c_str(), ".exe", MAX_PATH, buf, nullptr))
-        return buf;
-    return "";
-#else
-    std::string cmd = "which " + name + " 2>/dev/null";
-    FILE* pipe = popen(cmd.c_str(), "r");
-    if (!pipe) return "";
-    char buf[512] = {};
-    fgets(buf, sizeof(buf), pipe);
-    pclose(pipe);
-    std::string result(buf);
-    // Trim newline
-    if (!result.empty() && result.back() == '\n') result.pop_back();
-    return result;
-#endif
     QString path = QStandardPaths::findExecutable(QString::fromStdString(name));
     return path.toStdString();
 }
@@ -202,21 +177,20 @@ RemuxEngine::convertBatch(
 
 std::map<std::string, std::string> RemuxEngine::probe(const std::string& path) {
     if (m_ffprobe.empty() || !fs::exists(path)) return {};
-#ifdef _WIN32
-    std::string cmd =
-        "\"" + m_ffprobe + "\" -v quiet -print_format json -show_streams -show_format "
-        "\"" + path + "\"";
-#else
-    std::string cmd =
-        "'" + m_ffprobe + "' -v quiet -print_format json -show_streams -show_format "
-        "'" + path + "' 2>/dev/null";
-#endif
-    std::string output;
-    FILE* pipe = popen(cmd.c_str(), "r");
-    if (!pipe) return {};
-    char buf[256];
-    while (fgets(buf, sizeof(buf), pipe)) output += buf;
-    pclose(pipe);
+
+    QStringList args;
+    args << "-v" << "quiet"
+         << "-print_format" << "json"
+         << "-show_streams"
+         << "-show_format"
+         << QString::fromStdString(path);
+
+    QProcess proc;
+    proc.setProcessChannelMode(QProcess::MergedChannels);
+    proc.start(QString::fromStdString(m_ffprobe), args);
+    if (!proc.waitForFinished(30000)) return {};
+
+    std::string output = proc.readAll().toStdString();
 
     std::map<std::string, std::string> info;
     try {
