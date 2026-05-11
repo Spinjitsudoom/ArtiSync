@@ -4,9 +4,9 @@
 AppName=ArtiSync
 AppVersion=2.1.0
 AppPublisher=Spinjitsudoom
-AppPublisherURL=https://github.com/Spinjitsudoom/MusicManagerUltimate
-AppSupportURL=https://github.com/Spinjitsudoom/MusicManagerUltimate/issues
-AppUpdatesURL=https://github.com/Spinjitsudoom/MusicManagerUltimate/releases
+AppPublisherURL=https://github.com/Spinjitsudoom/ArtiSync
+AppSupportURL=https://github.com/Spinjitsudoom/ArtiSync/issues
+AppUpdatesURL=https://github.com/Spinjitsudoom/ArtiSync/releases
 DefaultDirName={autopf}\ArtiSync
 DefaultGroupName=ArtiSync
 AllowNoIcons=yes

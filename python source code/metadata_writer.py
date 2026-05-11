@@ -13,6 +13,7 @@ Metadata dict keys (all optional):
 """
 
 import os
+from concurrent.futures import ThreadPoolExecutor
 from mutagen.mp3 import MP3
 from mutagen.id3 import (
     ID3, ID3NoHeaderError,
@@ -61,13 +62,14 @@ def write_metadata_batch(file_paths, metadata, apply_art=True, apply_tags=True, 
     """
     Write the same metadata to a list of files.
 
+    Uses a thread pool to parallelize I/O-bound tagging operations.
     Returns a list of (file_path, True|error_str) tuples.
     """
-    results = []
-    for path in file_paths:
-        result = write_metadata(path, metadata, apply_art, apply_tags, apply_genre)
-        results.append((path, result))
-    return results
+    def _task(path):
+        return (path, write_metadata(path, metadata, apply_art, apply_tags, apply_genre))
+
+    with ThreadPoolExecutor() as executor:
+        return list(executor.map(_task, file_paths))
 
 
 def read_metadata(file_path):
