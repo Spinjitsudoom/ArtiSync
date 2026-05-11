@@ -1197,16 +1197,20 @@ nav.scrolled {
           <div class="dl-badge">Windows 10 / 11</div>
           <h3>Windows</h3>
         </div>
-        <p>Installer adds a Start Menu entry and optional desktop shortcut. Qt6 DLLs are bundled — no separate install required.</p>
+        <p>Installer adds a Start Menu entry and optional desktop shortcut. Qt6 is bundled — no extras needed. Prefer no install? Grab the portable zip instead.</p>
         <div class="dl-card-actions">
-          <a class="btn btn-primary" href="https://github.com/Spinjitsudoom/ArtiSync/releases/latest/download/ArtiSync-Setup.exe">⬇ Download</a>
+          <a class="btn btn-primary" href="https://github.com/Spinjitsudoom/ArtiSync/releases/latest/download/ArtiSync-Setup.exe">⬇ Installer</a>
+          <a class="btn btn-secondary" href="https://github.com/Spinjitsudoom/ArtiSync/releases/latest/download/ArtiSync-Portable.zip">⬇ Portable</a>
           <button class="dl-toggle" onclick="toggleInstall(this)">▼ Install guide</button>
         </div>
         <div class="dl-install" hidden>
+          <p><strong>Installer</strong></p>
           <p>1. Download and run <code>ArtiSync-Setup.exe</code>.</p>
-          <p>2. Follow the installer — Qt6 is bundled, no extras needed.</p>
+          <p>2. Follow the wizard — Qt6 DLLs are bundled, nothing else needed.</p>
+          <p><strong>Portable</strong></p>
+          <p>1. Download and extract <code>ArtiSync-Portable.zip</code>.</p>
+          <p>2. Run <code>ArtiSync.exe</code> directly — no install, no registry changes.</p>
           <p>3. For audio conversion, add <a href="https://ffmpeg.org/download.html" target="_blank">FFmpeg</a> to your <code>PATH</code>.</p>
-          <p>Prefer a portable install? Download <a href="https://github.com/Spinjitsudoom/ArtiSync/releases/latest/download/ArtiSync-Portable.zip">ArtiSync-Portable.zip</a>, extract, and run <code>ArtiSync.exe</code>.</p>
         </div>
       </div>
 
@@ -1366,7 +1370,8 @@ cmake --build build -j$(nproc)
       </div>
       <div class="footer-col">
         <h4>Install</h4>
-        <a href="https://github.com/Spinjitsudoom/ArtiSync/releases/latest/download/ArtiSync-Setup.exe">Windows</a>
+        <a href="https://github.com/Spinjitsudoom/ArtiSync/releases/latest/download/ArtiSync-Setup.exe">Windows Installer</a>
+        <a href="https://github.com/Spinjitsudoom/ArtiSync/releases/latest/download/ArtiSync-Portable.zip">Windows Portable</a>
         <a href="https://github.com/Spinjitsudoom/ArtiSync/releases/latest/download/ArtiSync.AppImage">AppImage</a>
         <a href="https://github.com/Spinjitsudoom/ArtiSync/releases/latest/download/ArtiSync.flatpak">Flatpak</a>
         <a href="https://github.com/Spinjitsudoom/ArtiSync">Source Code</a>
