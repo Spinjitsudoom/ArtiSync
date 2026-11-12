@@ -2,6 +2,8 @@
 
 A cross-platform music library organiser that fetches metadata from **Spotify**, renames your files, writes embedded tags, downloads cover art, and optionally converts between audio formats — available as both a **Python** desktop app and a compiled **C++ / Qt6** application.
 
+**[Website and interactive demo →](https://spinjitsudoom.github.io/my-portfolio/artisync.html)**
+
 ---
 
 ## Downloads
