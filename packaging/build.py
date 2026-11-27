@@ -109,13 +109,22 @@ _UNUSED_QT = (
 
 def _prune(bundle):
     removed = 0
-    for qt in bundle.rglob("Qt"):
-        if not qt.is_dir() or qt.parent.name != "PySide6":
-            continue
+    # In a macOS .app the Qt tree exists twice (Contents/Frameworks and
+    # Contents/Resources), with symlinks from one into the other, so a match
+    # may be a link, a real folder, or already gone.
+    qt_dirs = [q for q in bundle.rglob("Qt") if q.parent.name == "PySide6"
+               and q.is_dir() and not q.is_symlink()]
+    for qt in qt_dirs:
         for rel in _UNUSED_QT:
-            for path in qt.glob(rel + "*"):
-                removed += _size(path)
-                shutil.rmtree(path) if path.is_dir() else path.unlink()
+            for path in list(qt.glob(rel + "*")):
+                if path.is_symlink():
+                    path.unlink()
+                elif path.is_dir():
+                    removed += _size(path)
+                    shutil.rmtree(path)
+                elif path.exists():
+                    removed += _size(path)
+                    path.unlink()
     if sys.platform.startswith("linux"):
         removed += _prune_orphan_libs(bundle / "_internal")
     print(f"Pruned {removed / 1e6:.0f} MB of unused libraries")
@@ -150,7 +159,8 @@ def _prune_orphan_libs(internal):
 
 def _size(path):
     if path.is_dir():
-        return sum(f.stat().st_size for f in path.rglob("*") if f.is_file())
+        return sum(f.stat().st_size for f in path.rglob("*")
+                   if f.is_file() and not f.is_symlink())
     return path.stat().st_size
 
 
