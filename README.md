@@ -1,6 +1,6 @@
 # ArtiSync
 
-A cross-platform music library organiser that fetches metadata from **Spotify**, renames your files, writes embedded tags, downloads cover art, and optionally converts between audio formats — available as both a **Python** desktop app and a compiled **C++ / Qt6** application.
+A desktop music-library organiser for Windows, macOS and Linux. Point it at a folder of artist folders and it matches each album's files to the real release on **Deezer**, **MusicBrainz** or **Spotify**. It then renames the files, writes tags and cover art, and can convert between audio formats.
 
 **[Website and interactive demo →](https://spinjitsudoom.github.io/my-portfolio/artisync.html)**
 
@@ -8,246 +8,93 @@ A cross-platform music library organiser that fetches metadata from **Spotify**,
 
 ## Downloads
 
-| Package | Platform | Description |
+Get the latest builds from [Releases](../../releases/latest).
+
+| File | Platform | Notes |
 |---|---|---|
-| `ArtiSync-Setup.exe` | Windows 10/11 | Installer — adds Start Menu entry and optional desktop shortcut |
-| `ArtiSync-Portable.zip` | Windows 10/11 | Portable — extract and run `ArtiSync.exe`, no install needed |
-| `ArtiSync.AppImage` | Linux (any) | Self-contained AppImage — download, `chmod +x`, run |
-| `ArtiSync.flatpak` | Linux (Flatpak) | Install via `flatpak install` |
+| `ArtiSync-Setup.exe` | Windows 10/11 | Installer with Start Menu entry and optional desktop shortcut |
+| `ArtiSync-Portable.zip` | Windows 10/11 | Extract and run `ArtiSync\ArtiSync.exe`, no install |
+| `ArtiSync-macOS.dmg` | macOS 11+ (Apple Silicon) | Drag ArtiSync to Applications |
+| `ArtiSync-macOS-app.zip` | macOS 11+ (Apple Silicon) | The app on its own |
+| `ArtiSync.AppImage` | Linux (x86_64) | `chmod +x ArtiSync.AppImage` and run |
+| `ArtiSync.flatpak` | Linux (Flatpak) | `flatpak install --user ArtiSync.flatpak` |
 
-See the [Releases](../../releases) section for the latest builds.
+**macOS:** the app isn't notarized by Apple, so the first launch is blocked. Right-click ArtiSync → **Open**, or allow it under System Settings → Privacy & Security.
 
----
-
-## How It Works
-
-1. **Browse** — point the app at a folder containing artist sub-folders (e.g. `/music/Avenged Sevenfold/`)
-2. **Auto-detect** — the app searches Spotify for the artist automatically and populates the releases sidebar with album art thumbnails
-3. **Select a release** — click any album or single; the app fetches its full track list and cover art
-4. **Match** — the fuzzy matcher maps your local audio files to the correct track names using edit-distance scoring, even if the filenames are messy or incomplete
-5. **Preview** — the Preview tab shows exactly which files will be renamed and what their new names will be, with a per-track confidence score
-6. **Execute** — click **Execute Rename + Tag** to rename files, write all embedded tags, and embed cover art in one step
-7. **Undo** — every rename operation can be fully reversed with the **Undo** button
+**Converting audio** needs [FFmpeg](https://ffmpeg.org/download.html) on your `PATH` (the Flatpak includes it).
 
 ---
 
-## UI Features
+## How it works
 
-### Toolbar
-- **Browse** — opens a folder picker; the selected path is remembered between sessions
-- **Artist / Album dropdowns** — manually override the auto-detected artist or album
-- **Batch** — processes all artist sub-folders in the root directory automatically
+1. **Choose your music folder**, the one that holds your artist folders (`Music/Three Days Grace/Alienation (2025)/…`). Everything else is automatic.
+2. **Library** lists every artist and album with its status: not opened yet, needs attention, or done. ArtiSync opens the first unfinished album.
+3. **Matching**: the album folder is matched to the right release, and each file to a track, even with messy names (`Track 3 - mayday.mp3`). Every track shows a confidence score.
+4. **Fix anything by hand**: pick a different release from the **Releases** column (or search for one), and use **Change** / **Assign to** to pair files and tracks yourself.
+5. **Rename & Tag** renames the files and writes title, artist, album, year, genre, track numbers and cover art in one go. **Undo** reverses it.
+6. **Next album** (Ctrl+→) moves on through the library.
 
-### Spotify Releases Sidebar
-- Lists every release found for the detected artist (albums, singles, EPs)
-- Each row shows a **64×64 album art thumbnail** that loads asynchronously in the background
-- Clicking a release loads its track list and updates the art panel on the right
+Renames never overwrite another file, and Undo restores the original names exactly.
 
-### Preview Tab
-- Shows a row for each track with the current filename → proposed new filename and a match confidence percentage
-- Green rows = high confidence match; amber/red = low confidence or unmatched
-- Nothing is changed until you click Execute
+## Features
 
-### Log Tab
-- Records every rename, tag-write, and error message from the current session
+- **Three metadata sources** (Settings → *Look up albums on*):
+  - **Deezer**: fast, no account needed (default)
+  - **MusicBrainz**: no account needed, lists every edition, slower
+  - **Spotify**: needs a free developer app (see below)
+- **Releases column**: the artist's albums, singles and EPs with artwork. Type to filter it, or press Enter to search the whole source for albums filed under another artist.
+- **File names**: `01 - Title.mp3` with track numbers (or `1-01 - …` on multi-disc albums), or just `Title.mp3`. Toggle under *File names*.
+- **Write to files**: choose whether to write artwork, tags and genre.
+- **Convert**: MP3, FLAC, M4A, OGG and WAV, optionally before every rename.
+- **Updates**: ArtiSync checks GitHub for a new version when it starts (turn this off in Settings) and can download and install it in one click, then reopens. The Flatpak saves the new version to Downloads for your software centre to install. Every download is checked against the release's SHA-256 checksum.
+- **9 colour themes**: Dark, Light, Midnight, Emerald, Amethyst, Crimson, Forest, Ocean, Slate.
+- **Keyboard shortcuts**: Ctrl+→ / Ctrl+← next/previous album, Ctrl+Enter Rename & Tag, Ctrl+Z Undo, F5 Refresh, Ctrl+F filter library, Ctrl+Shift+F search releases, Ctrl+O choose folder, Ctrl+, Settings.
 
-### Art & Metadata Panel (right side)
-- Displays the full cover art for the selected release
-- Shows Artist, Album, Year, and Genre
-- **Art / Tags / Genre** chip toggles control which data is written during Execute
-- **Fetch Artwork** manually re-downloads cover art for the selected release
+## Spotify setup (optional)
 
-### Status Bar
-- **✓ Artist** — shows the auto-detected artist name (green = matched)
-- **Matched / Missing** — live count of matched and unmatched files
-- **Spotify** — connection status indicator
+1. Create a free app at [developer.spotify.com/dashboard](https://developer.spotify.com/dashboard).
+2. Copy its **Client ID** and **Client secret**.
+3. In ArtiSync open **Settings**, choose **Spotify**, paste both, and **Save**.
 
-### File → Settings
-- Enter your Spotify **Client ID** and **Client Secret**
-- Switch between **9 colour themes**: Dark, Light, Midnight, Emerald, Amethyst, Crimson, Forest, Ocean, Slate
-- Enable **Auto-convert** to automatically remux or transcode files after tagging
+Spotify limits how many requests a developer app can make. If it pauses yours, ArtiSync says how long for and offers to switch to Deezer.
 
-### File → Convert
-- Convert individual files or entire folders between MP3, FLAC, M4A, OGG, and WAV
-- Select quality preset (Low / Medium / High / Best)
-- Option to delete source files after conversion
-
----
-
-## Installing the AppImage
-
-The AppImage requires Qt6 runtime libraries on the host system.
-
-On Fedora/RHEL:
-```bash
-sudo dnf install qt6-qtbase qt6-qtbase-gui
-```
-
-On Ubuntu/Debian:
-```bash
-sudo apt install qt6-base qt6-base-gui
-```
-
-Then run:
-```bash
-chmod +x ArtiSync.AppImage
-./ArtiSync.AppImage
-```
-
-## Installing the Flatpak
-
-```bash
-flatpak install --user ArtiSync.flatpak
-flatpak run com.artisync.ArtiSync
-```
-
----
-
-## Spotify API Setup
-
-1. Go to [developer.spotify.com/dashboard](https://developer.spotify.com/dashboard) and create a free app
-2. Copy the **Client ID** and **Client Secret**
-3. In the app: **File → Settings**, paste both values, click **Save**
-4. The engine reconnects immediately — a green status dot confirms success
-
----
-
-## Audio Conversion
-
-The conversion dialog (**File → Convert**) supports:
+## Audio conversion
 
 | Input | Output |
 |---|---|
 | MP3, FLAC, M4A, AAC, MP4, OGG, WAV, OPUS, WMA | MP3, FLAC, M4A, OGG, WAV |
 
-Quality presets for lossy output:
-
-| Preset | MP3 | AAC/M4A |
+| Quality | MP3 | AAC / M4A |
 |---|---|---|
 | Low | 128 kbps | 128 kbps |
-| Medium *(default)* | 192 kbps | 192 kbps |
+| Medium | 192 kbps | 192 kbps |
 | High | 320 kbps | 256 kbps |
 | Best | VBR V0 | 256 kbps |
 
-AAC↔M4A and MP4→M4A are remuxed (stream copy, no quality loss). All other pairs are transcoded via FFmpeg. Cover art is preserved where the container supports it.
-
-FFmpeg must be on your `PATH` for conversion to work.
+AAC/MP4 → M4A is a lossless container change; everything else is re-encoded with FFmpeg. Cover art is kept where the format supports it. Convert never overwrites an existing file.
 
 ---
 
-## Python Version
-
-### Requirements
-
-- Python 3.9+
-- `customtkinter` — themed UI widgets
-- `Pillow` — image display and thumbnail rendering
-- `spotipy` — Spotify Web API client
-- `thefuzz` — fuzzy string matching
-- `mutagen` — audio tag writing
-- FFmpeg on `PATH` (for audio conversion)
-
-Install dependencies:
+## Running from source
 
 ```bash
-pip install customtkinter pillow spotipy thefuzz mutagen
+./run.sh
 ```
 
-### Running
+The first run creates a Python environment in `~/.local/share/ArtiSync/venv` and installs PySide6, spotipy, thefuzz and mutagen; later runs start straight away. `./run.sh --update` upgrades them. Python 3.10 or newer is required.
 
-```bash
-cd "python source code"
-python music_organizer.py
-```
+## Building
 
-### Module overview
+| Platform | Command | Output |
+|---|---|---|
+| Linux AppImage | `PYTHON=python3 bash packaging/linux/build_appimage.sh` | `final result/ArtiSync-<version>-x86_64.AppImage` |
+| Linux Flatpak | `bash packaging/flatpak/build_flatpak.sh` | `final result/ArtiSync.flatpak` |
+| macOS | `bash packaging/macos/build_dmg.sh` | `packaging/out/ArtiSync-macOS.dmg` |
+| Windows | `python packaging\build.py` then `iscc /DAppVersion=<version> packaging\windows\ArtiSync.iss` | `packaging\out\ArtiSync-Setup.exe` |
 
-| File | Purpose |
-|---|---|
-| `music_organizer.py` | Main application window, UI logic, event wiring |
-| `spotify_engine.py` | Spotify search, releases, tracks, metadata, cover art |
-| `base_engine.py` | Shared file-matching logic used by both engines |
-| `metadata_writer.py` | Writes ID3, Vorbis, and MP4 tags via Mutagen |
-| `remux_engine.py` | FFmpeg wrapper for audio format conversion |
+The Python used needs `pip install -r packaging/requirements.txt pyinstaller pillow`. The Flatpak needs `flatpak-builder` and `org.freedesktop.Sdk//25.08`.
 
----
-
-## C++ / Qt6 Version
-
-The `c++ source code/` directory contains a full reimplementation in C++17 with Qt6 Widgets. It compiles to a standalone binary with the same feature set, built using CMake with FetchContent for dependencies.
-
-### Build requirements
-
-| Dependency | Notes |
-|---|---|
-| CMake ≥ 3.16 | Build system |
-| C++17 compiler | GCC 10+, Clang 12+ |
-| Qt 6 (Core, Gui, Widgets) | System package |
-| OpenSSL | For HTTPS via libcurl |
-| libcurl | Auto-fetched if not found on system |
-| TagLib | Auto-fetched if not found on system |
-| nlohmann/json | Always auto-fetched (header-only) |
-
-On Fedora/RHEL:
-```bash
-sudo dnf install cmake gcc-c++ qt6-qtbase-devel openssl-devel
-```
-
-On Ubuntu/Debian:
-```bash
-sudo apt install cmake g++ qt6-base-dev libssl-dev
-```
-
-### Build the binary
-
-```bash
-cd "c++ source code"
-cmake -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build -j$(nproc)
-./build/ArtiSync
-```
-
-### Build the AppImage
-
-Requires an ostree-based Fedora system (Silverblue / Kinoite) with Qt6 devel headers in the sysroot. On standard Fedora, use the binary build above instead.
-
-```bash
-cd "c++ source code"
-bash build.sh
-# Output: ../final result/ArtiSync.AppImage
-```
-
-### Build the Flatpak
-
-Requires `flatpak-builder` and `org.kde.Sdk//6.10`:
-
-```bash
-flatpak install flathub org.kde.Sdk//6.10 org.kde.Platform//6.10
-cd "c++ source code"
-bash flatpak_build.sh
-# Output: ../Flatpak final result/ArtiSync.flatpak
-```
-
-### C++ module overview
-
-| File | Purpose |
-|---|---|
-| `main.cpp` | Entry point — initialises QApplication, sets window icon and desktop name |
-| `music_organizer.cpp/.h` | Main window, all UI panels, event slots, theme engine |
-| `spotify_engine.cpp/.h` | Spotify Web API — artist search, releases, tracks, metadata, cover art |
-| `base_engine.cpp/.h` | Shared fuzzy file-to-track matching logic |
-| `metadata_writer.cpp/.h` | Writes tags using TagLib (ID3v2, Vorbis, MP4) |
-| `remux_engine.cpp/.h` | FFmpeg subprocess wrapper; convert + batch convert + probe |
-| `http_client.cpp/.h` | Thin libcurl wrapper for HTTP GET with JSON and binary responses |
-| `fuzzy.cpp/.h` | Levenshtein / token-ratio fuzzy matching |
-| `types.h` | Shared data structures: `Track`, `Release`, `ReleaseMetadata`, `MatchResult`, `BatchResult` |
-| `resources/resources.qrc` | Qt resource bundle (app icon) |
-| `CMakeLists.txt` | Build definition; detects system libs, falls back to FetchContent |
-| `build.sh` | One-shot AppImage build script |
-| `flatpak_build.sh` | One-shot Flatpak build script |
-| `flatpak/com.artisync.ArtiSync.yml` | Flatpak manifest (KDE Platform 6.10) |
-
----
+GitHub Actions builds all of them. Run **Actions → Build** manually for test builds, or push a tag matching `python source code/version.py` (e.g. `v3.0.0`) to publish a release.
 
 ## License
 

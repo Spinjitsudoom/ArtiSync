@@ -14,6 +14,7 @@ Quality presets for lossy output (MP3 / AAC):
 
 import os
 import shutil
+import sys
 import subprocess
 
 
@@ -53,6 +54,19 @@ _AAC_QUALITY = {
 }
 
 
+
+def _find_tool(name):
+    """A copy shipped next to the packaged app wins over one on PATH."""
+    exe = name + (".exe" if sys.platform == "win32" else "")
+    roots = [getattr(sys, "_MEIPASS", None), os.path.dirname(sys.executable)
+             if getattr(sys, "frozen", False) else None]
+    for root in filter(None, roots):
+        for sub in ("", "ffmpeg", "bin"):
+            path = os.path.join(root, sub, exe)
+            if os.path.isfile(path):
+                return path
+    return shutil.which(name)
+
 class RemuxEngine:
     """
     Thin wrapper around FFmpeg for audio format conversion.
@@ -70,8 +84,8 @@ class RemuxEngine:
     """
 
     def __init__(self):
-        self._ffmpeg = shutil.which("ffmpeg")
-        self._ffprobe = shutil.which("ffprobe")
+        self._ffmpeg = _find_tool("ffmpeg")
+        self._ffprobe = _find_tool("ffprobe")
 
     # ── Public ────────────────────────────────────────────────────────────────
 

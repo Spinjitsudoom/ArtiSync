@@ -1,0 +1,77 @@
+# ArtiSync Flatpak.   bash packaging/flatpak/build_flatpak.sh
+#
+# Runs from source on the Freedesktop runtime's Python. The runtime already
+# includes ffmpeg/ffprobe with the encoders Convert needs (MP3 via LAME,
+# FLAC, AAC, Vorbis, Opus, WAV).
+app-id: com.artisync.ArtiSync
+runtime: org.freedesktop.Platform
+runtime-version: '25.08'
+sdk: org.freedesktop.Sdk
+command: ArtiSync
+
+finish-args:
+  - --share=ipc
+  - --share=network                  # Deezer / MusicBrainz / Spotify, cover art
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --device=dri
+  # Music folders. Narrow on purpose: the app renames, tags, converts and
+  # can delete files.
+  - --filesystem=xdg-music:rw
+  - --filesystem=xdg-download:rw
+  - --filesystem=xdg-documents:rw    # settings live in ~/Documents/ArtiSync
+  - --filesystem=/run/media:rw       # removable drives
+  - --filesystem=/mnt:rw             # mounted drives and network shares
+  - --filesystem=/var/mnt:rw         # same, on Fedora Atomic / Bazzite
+
+modules:
+  # Python dependencies from PyPI (pinned in packaging/requirements.txt).
+  - name: python-deps
+    buildsystem: simple
+    build-options:
+      build-args:
+        - --share=network
+    sources:
+      - type: file
+        path: ../requirements.txt
+    build-commands:
+      - pip3 install --prefix=/app --no-cache-dir -r requirements.txt
+      # Parts of PySide6 ArtiSync never loads (QML/Quick, PDF, designer
+      # tools, translations, GTK theme): about 60 MB.
+      - |
+        cd /app/lib/python3*/site-packages/PySide6
+        rm -rf Qt/translations Qt/qml designer assistant linguist lupdate lrelease \
+               qmllint qmlformat qmlls uic rcc balsam balsamui svgtoqml \
+               QtQml* QtQuick* QtPdf* QtDesigner* QtUiTools* QtHelp* \
+               Qt/lib/libQt6Quick* Qt/lib/libQt6Qml* Qt/lib/libQt6Pdf* \
+               Qt/lib/libQt6VirtualKeyboard* Qt/lib/libQt6Designer* Qt/lib/libQt6Help* \
+               Qt/plugins/platforminputcontexts/libqtvirtualkeyboardplugin.so \
+               Qt/plugins/imageformats/libqpdf.so Qt/plugins/platformthemes/libqgtk3.so \
+               Qt/plugins/designer Qt/plugins/qmltooling
+
+  - name: artisync
+    buildsystem: simple
+    sources:
+      - type: dir
+        path: ../../python source code
+        # music_config.json there holds the developer's own credentials.
+        skip:
+          - music_config.json
+          - __pycache__
+          - gui/__pycache__
+      - type: dir
+        path: ../linux
+        dest: linux
+    build-commands:
+      - install -Dm644 -t /app/share/artisync *.py ArtiSync.png
+      - install -Dm644 -t /app/share/artisync/gui gui/*.py gui/style.qss
+      - python3 -m compileall -q /app/share/artisync
+      - |
+        cat > /app/bin/ArtiSync <<'SH'
+        #!/bin/sh
+        exec python3 /app/share/artisync/artisync.py "$@"
+        SH
+        chmod +x /app/bin/ArtiSync
+      - install -Dm644 ArtiSync.png /app/share/icons/hicolor/512x512/apps/com.artisync.ArtiSync.png
+      - install -Dm644 linux/com.artisync.ArtiSync.desktop /app/share/applications/com.artisync.ArtiSync.desktop
+      - install -Dm644 linux/com.artisync.ArtiSync.metainfo.xml /app/share/metainfo/com.artisync.ArtiSync.metainfo.xml

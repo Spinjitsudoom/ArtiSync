@@ -1,0 +1,407 @@
+/* ArtiSync stylesheet. @tokens are replaced with theme colours at load
+   time (gui/theme.py). Shared with the C++ app. */
+
+QWidget {
+    color: @text;
+    font-size: 13px;
+}
+QMainWindow, QDialog, #Root {
+    background: @window;
+}
+QToolTip {
+    background: @raised;
+    color: @text;
+    border: 1px solid @border;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+/* ── Top bar ─────────────────────────────────────────────────────────────── */
+#TopBar {
+    background: @panel;
+    border-bottom: 1px solid @border_soft;
+}
+#AppTitle {
+    font-size: 16px;
+    font-weight: 700;
+}
+#PathButton {
+    background: @card;
+    color: @muted;
+    border: 1px solid @border_soft;
+    border-radius: 8px;
+    padding: 6px 12px;
+    text-align: left;
+}
+#PathButton:hover {
+    color: @text;
+    border-color: @border;
+}
+#SpotifyPill {
+    background: @raised;
+    color: @muted;
+    border-radius: 11px;
+    padding: 3px 10px;
+    font-size: 12px;
+}
+#SpotifyPill[state="ok"] {
+    background: @success_bg;
+    color: @success;
+}
+#SpotifyPill[state="bad"] {
+    background: @danger_bg;
+    color: @danger;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
+QPushButton {
+    background: @raised;
+    color: @text;
+    border: 1px solid @border_soft;
+    border-radius: 8px;
+    padding: 7px 14px;
+}
+QPushButton:hover {
+    background: @raised_hover;
+}
+QPushButton:pressed {
+    background: @card;
+}
+QPushButton:disabled {
+    color: @faint;
+    background: @card;
+}
+QPushButton[variant="primary"] {
+    background: @accent;
+    color: @accent_text;
+    border: none;
+    font-weight: 600;
+    padding: 8px 18px;
+}
+QPushButton[variant="primary"]:hover {
+    background: @accent_hover;
+}
+QPushButton[variant="primary"]:disabled {
+    background: @raised;
+    color: @faint;
+}
+QPushButton[variant="ghost"] {
+    background: transparent;
+    border: none;
+    color: @muted;
+}
+QPushButton[variant="ghost"]:hover {
+    background: @card_hover;
+    color: @text;
+}
+QPushButton[variant="small"] {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+}
+QPushButton[variant="chip"] {
+    background: @card;
+    color: @muted;
+    border: 1px solid @border_soft;
+    border-radius: 14px;
+    padding: 5px 11px;
+}
+QPushButton[variant="chip"]:checked {
+    background: @selection;
+    color: @selection_text;
+    border-color: @accent;
+}
+QPushButton[variant="segment"] {
+    background: transparent;
+    color: @muted;
+    border: none;
+    border-radius: 7px;
+    padding: 5px 14px;
+}
+QPushButton[variant="segment"]:checked {
+    background: @raised;
+    color: @text;
+}
+#Segmented {
+    background: @card;
+    border: 1px solid @border_soft;
+    border-radius: 9px;
+}
+
+/* ── Side panels ─────────────────────────────────────────────────────────── */
+#Panel {
+    background: @panel;
+}
+#PanelHeader {
+    color: @muted;
+    font-size: 11px;
+    font-weight: 700;
+}
+#Badge {
+    background: @raised;
+    color: @muted;
+    border-radius: 9px;
+    padding: 1px 8px;
+    font-size: 11px;
+}
+QLineEdit {
+    background: @card;
+    border: 1px solid @border_soft;
+    border-radius: 8px;
+    padding: 6px 10px;
+    selection-background-color: @selection;
+}
+QLineEdit:focus {
+    border-color: @accent;
+}
+
+QTreeView#LibraryTree, QListView#ReleaseList {
+    background: @panel;
+    border: none;
+    outline: 0;
+}
+QTreeView#LibraryTree::item {
+    padding: 5px 4px;
+}
+QTreeView#LibraryTree::item:hover {
+    background: @card_hover;
+}
+QTreeView#LibraryTree::item:selected {
+    background: @selection;
+    color: @selection_text;
+}
+
+QSplitter::handle {
+    background: @border_soft;
+}
+QSplitter::handle:horizontal {
+    width: 1px;
+}
+
+/* ── Album view ──────────────────────────────────────────────────────────── */
+#AlbumTitle {
+    font-size: 22px;
+    font-weight: 700;
+}
+#AlbumSub {
+    color: @muted;
+}
+#Chip {
+    border-radius: 10px;
+    padding: 3px 10px;
+    font-size: 12px;
+    background: @raised;
+    color: @muted;
+}
+#Chip[tone="ok"]     { background: @success_bg; color: @success; }
+#Chip[tone="warn"]   { background: @warning_bg; color: @warning; }
+#Chip[tone="bad"]    { background: @danger_bg;  color: @danger; }
+
+#TrackRow {
+    background: @card;
+    border: 1px solid @border_soft;
+    border-radius: 10px;
+}
+#TrackRow:hover {
+    background: @card_hover;
+}
+#TrackRow[state="missing"] {
+    background: transparent;
+    border: 1px dashed @border;
+}
+#TrackRow[state="warn"] {
+    border-color: @warning;
+}
+#TrackRow[state="loose"] {
+    background: @warning_bg;
+    border-color: @warning;
+}
+#TrackNum {
+    color: @faint;
+    font-size: 12px;
+}
+#TrackTitle {
+    font-size: 14px;
+}
+#TrackRow[state="missing"] #TrackTitle {
+    color: @muted;
+}
+#TrackFile {
+    color: @muted;
+    font-size: 12px;
+}
+#Score {
+    border-radius: 9px;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 600;
+}
+#Score[tone="ok"]   { background: @success_bg; color: @success; }
+#Score[tone="warn"] { background: @warning_bg; color: @warning; }
+#Score[tone="bad"]  { background: @danger_bg;  color: @danger; }
+#Score[tone="done"] { background: transparent; color: @success; }
+#SectionLabel {
+    color: @muted;
+    font-size: 11px;
+    font-weight: 700;
+}
+#EmptyState {
+    color: @muted;
+    font-size: 15px;
+}
+QTextEdit#Log {
+    background: @card;
+    border: 1px solid @border_soft;
+    border-radius: 10px;
+    font-family: "JetBrains Mono", "Fira Code", "DejaVu Sans Mono", monospace;
+    font-size: 12px;
+    padding: 8px;
+}
+QTextBrowser#ReleaseNotes {
+    background: @card;
+    border: 1px solid @border_soft;
+    border-radius: 10px;
+    padding: 8px;
+}
+QScrollArea, QScrollArea > QWidget > QWidget#RowsHost {
+    background: transparent;
+    border: none;
+}
+
+/* ── Details panel ───────────────────────────────────────────────────────── */
+#DetailKey {
+    color: @faint;
+    font-size: 11px;
+    font-weight: 700;
+}
+#DetailValue {
+    font-size: 13px;
+}
+
+/* ── Action bar ──────────────────────────────────────────────────────────── */
+#ActionBar {
+    background: @panel;
+    border-top: 1px solid @border_soft;
+}
+#ProgressText {
+    color: @muted;
+    font-size: 12px;
+}
+QProgressBar {
+    background: @raised;
+    border: none;
+    border-radius: 2px;
+    max-height: 4px;
+    min-height: 4px;
+}
+QProgressBar::chunk {
+    background: @accent;
+    border-radius: 2px;
+}
+
+#Toast {
+    background: @raised;
+    border: 1px solid @border;
+    border-radius: 10px;
+}
+#Toast QLabel {
+    background: transparent;
+}
+
+/* ── Menus, combos, checkboxes, scrollbars ───────────────────────────────── */
+QMenu {
+    background: @card;
+    border: 1px solid @border;
+    border-radius: 8px;
+    padding: 4px;
+}
+QMenu::item {
+    padding: 6px 18px;
+    border-radius: 6px;
+}
+QMenu::item:selected {
+    background: @selection;
+    color: @selection_text;
+}
+QMenu::item:disabled {
+    color: @faint;
+}
+QMenu::separator {
+    height: 1px;
+    background: @border_soft;
+    margin: 4px 6px;
+}
+QComboBox {
+    background: @card;
+    border: 1px solid @border_soft;
+    border-radius: 8px;
+    padding: 5px 10px;
+}
+QComboBox:hover {
+    border-color: @border;
+}
+QComboBox QAbstractItemView {
+    background: @card;
+    border: 1px solid @border;
+    selection-background-color: @selection;
+    outline: 0;
+}
+QCheckBox {
+    spacing: 8px;
+}
+QCheckBox::indicator {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    border: 1px solid @border;
+    background: @card;
+}
+QCheckBox::indicator:checked {
+    background: @accent;
+    border-color: @accent;
+}
+QGroupBox {
+    border: 1px solid @border_soft;
+    border-radius: 10px;
+    margin-top: 14px;
+    padding: 12px 10px 10px 10px;
+}
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 10px;
+    padding: 0 4px;
+    color: @muted;
+}
+QListWidget {
+    background: @card;
+    border: 1px solid @border_soft;
+    border-radius: 8px;
+    outline: 0;
+}
+QScrollBar:vertical {
+    background: transparent;
+    width: 10px;
+    margin: 2px;
+}
+QScrollBar::handle:vertical {
+    background: @raised;
+    border-radius: 3px;
+    min-height: 32px;
+}
+QScrollBar::handle:vertical:hover {
+    background: @raised_hover;
+}
+QScrollBar:horizontal {
+    background: transparent;
+    height: 10px;
+    margin: 2px;
+}
+QScrollBar::handle:horizontal {
+    background: @raised;
+    border-radius: 3px;
+    min-width: 32px;
+}
+QScrollBar::add-line, QScrollBar::sub-line,
+QScrollBar::add-page, QScrollBar::sub-page {
+    width: 0; height: 0; background: transparent;
+}

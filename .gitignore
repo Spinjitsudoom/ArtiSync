@@ -28,3 +28,9 @@ Thumbs.db
 .claude/
 rules/
 music_config.json
+
+# Packaging output
+packaging/build/
+packaging/dist/
+packaging/out/
+.flatpak-builder/

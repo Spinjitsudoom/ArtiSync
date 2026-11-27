@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.artisync.ArtiSync</id>
+  <name>ArtiSync</name>
+  <summary>Organize and tag your music library</summary>
+  <description>
+    <p>
+      Matches the audio files in your album folders to releases on Deezer,
+      MusicBrainz or Spotify, renames them, writes embedded tags and cover
+      art, and converts between audio formats.
+    </p>
+  </description>
+  <launchable type="desktop-id">com.artisync.ArtiSync.desktop</launchable>
+  <developer id="com.artisync">
+    <name>Etienne Axiak</name>
+  </developer>
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT</project_license>
+  <url type="homepage">https://github.com/Spinjitsudoom/ArtiSync</url>
+  <categories>
+    <category>AudioVideo</category>
+    <category>Audio</category>
+    <category>Music</category>
+  </categories>
+  <releases>
+    <release version="3.0.0" date="2026-11-26"/>
+    <release version="2.1.0" date="2026-05-03"/>
+  </releases>
+  <content_rating type="oars-1.1"/>
+</component>

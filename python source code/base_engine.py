@@ -1,17 +1,52 @@
 """
 base_engine.py
-Shared file-matching logic inherited by MBEngine and SpotifyEngine.
-Both engines expose the same interface so music_organizer can swap them freely.
+Shared file-matching logic inherited by every metadata engine (Deezer,
+MusicBrainz, Spotify). They all expose the same interface, so the app can
+swap them freely.
 """
 
 import os
 import re
-from thefuzz import process, fuzz
+from thefuzz import process, fuzz, utils
 
 # Minimum fuzzy score (0–100) to accept a match.
 # Lower = more permissive, higher = stricter.
 TRACK_MATCH_THRESHOLD  = 30   # file → track name match
 ALBUM_MATCH_THRESHOLD  = 80   # folder → release title match (batch mode)
+
+# Only these files are ever matched / renamed. Anything else in an album
+# folder (cover.jpg, .lrc, .nfo, .cue, …) is left alone.
+AUDIO_EXTENSIONS = {".mp3", ".flac", ".m4a", ".aac", ".mp4",
+                    ".ogg", ".oga", ".wav", ".opus", ".wma"}
+
+
+# Catalogues use typographic punctuation ("One‐X", "Don’t"); file names and
+# tags read better (and match other sources) with the plain forms.
+_PLAIN = str.maketrans({"‐": "-", "‑": "-", "‒": "-", "–": "-", "—": "-",
+                        "’": "'", "‘": "'", "“": '"', "”": '"', "…": "..."})
+
+
+def plain_text(s):
+    return (s or "").translate(_PLAIN)
+
+
+def normalize_ext(raw_ext):
+    """Normalize compound extensions like '.audio aac' → '.aac'."""
+    ext = raw_ext.strip().lower()
+    if " " in ext:
+        ext = "." + ext.split()[-1]
+    return ext
+
+
+def is_audio_file(filename):
+    return normalize_ext(os.path.splitext(filename)[1]) in AUDIO_EXTENSIONS
+
+
+def list_audio_files(folder_path):
+    """Audio files (names only) directly inside folder_path, unsorted.
+    Raises OSError if the folder can't be read."""
+    return [f for f in os.listdir(folder_path)
+            if os.path.isfile(os.path.join(folder_path, f)) and is_audio_file(f)]
 
 
 class BaseEngine:
@@ -65,7 +100,19 @@ class BaseEngine:
         r'\(feat\.|\(ft\.|\(with\b|\bfeat\.|\bft\.|\bfeaturing\b', re.I
     )
 
-    def _track_filename(self, track, ext):
+    # When True, file names start with the track number: "01 - Title.mp3",
+    # or "1-01 - Title.mp3" on multi-disc releases. The app sets this from
+    # AppConfig.track_numbers.
+    track_number_prefix = False
+
+    @staticmethod
+    def _naming(tracks):
+        """(multi_disc, number_width) for a release's track list."""
+        multi = len({t.get("disc", 1) for t in tracks}) > 1
+        top = max((t.get("num", 0) for t in tracks), default=0)
+        return multi, max(2, len(str(top)))
+
+    def _track_filename(self, track, ext, multi_disc=False, width=2):
         """
         Append featured artists only when the Spotify title doesn't already
         embed featuring info. If the title contains any feat/ft/with marker
@@ -80,6 +127,11 @@ class BaseEngine:
             if new_feats:
                 feat_str = " & ".join(self._sanitize(a) for a in new_feats)
                 name = f"{name} ft. {feat_str}"
+        if self.track_number_prefix:
+            num = f"{track['num']:0{width}d}"
+            if multi_disc:
+                num = f"{track.get('disc', 1)}-{num}"
+            name = f"{num} - {name}"
         return f"{name}{ext}"
 
     # ── Single-album preview ──────────────────────────────────────────────────
@@ -87,23 +139,21 @@ class BaseEngine:
     def generate_preview(self, folder_path, tracks, f_offset=0):
         """
         NUMERIC: Match files (sorted alphabetically) to tracks in order.
-        No track-number prefix on output filenames.
+        Output names follow _track_filename (optionally numbered).
         Returns ([(old, new, track_num, disc_num), …], log_string).
         """
         try:
-            files = sorted([
-                f for f in os.listdir(folder_path)
-                if os.path.isfile(os.path.join(folder_path, f))
-            ])
+            files = sorted(list_audio_files(folder_path))
         except Exception as e:
             return [], f"Error reading folder: {e}"
 
         ep_data, log = [], "NUMERIC MATCH:\n"
+        naming = self._naming(tracks)
         for i, f in enumerate(files):
             idx = i + f_offset
             if 0 <= idx < len(tracks):
                 ext      = os.path.splitext(f)[1]
-                new_name = self._track_filename(tracks[idx], ext)
+                new_name = self._track_filename(tracks[idx], ext, *naming)
                 ep_data.append((f, new_name, tracks[idx]["num"], tracks[idx].get("disc", 1), 100))
                 log += f"  {f}\n  → {new_name}\n\n"
         return ep_data, log
@@ -117,10 +167,7 @@ class BaseEngine:
         Returns ([(old, new, track_num, disc_num), …], log_string).
         """
         try:
-            files = [
-                f for f in os.listdir(folder_path)
-                if os.path.isfile(os.path.join(folder_path, f))
-            ]
+            files = list_audio_files(folder_path)
         except Exception as e:
             return [], f"Error: {e}"
 
@@ -139,49 +186,62 @@ class BaseEngine:
         norm_titles = list(norm_map.keys())
 
         temp_matches, log = [], "FUZZY MATCH:\n"
-        used_tracks  = set()   # track names already claimed — one file per track
+        files = sorted(files, key=str.casefold)   # deterministic tie-breaking
 
-        for f in files:
+        # ── Score every file against every track ──────────────────────────────
+        # Matches are then handed out best-score-first. Matching file by file
+        # (in directory order) let one oddly named file steal a track and push
+        # correctly named files onto the wrong tracks.
+        def proc(s):
+            return utils.full_process(s)          # what extractOne applied
+
+        norm_procs = [(nt, proc(nt)) for nt in norm_titles]
+        candidates, best_for_file = [], {}
+        for fi, f in enumerate(files):
             fn_base = os.path.splitext(f)[0].replace(".", " ").replace("_", " ")
             fn_base = re.sub(
                 r"(1080p|720p|x264|x265|HEVC|WEB-DL|BluRay|\d{3}kbps)",
                 "", fn_base, flags=re.I
             )
-            fn_base = re.sub(r"^\d+\s*[-\.]\s*", "", fn_base).strip()
-            fn_norm = self._normalize_for_matching(fn_base)
+            # Strip a leading "01 - " or multi-disc "1-01 - " track number.
+            fn_base = re.sub(r"^(?:\d+\s*[-.]\s*)?\d+\s*[-.]\s*", "", fn_base).strip()
+            fn_proc = proc(self._normalize_for_matching(fn_base))
+            for ti, (nt, nt_proc) in enumerate(norm_procs):
+                score = self._subset_sort_ratio(fn_proc, nt_proc) if fn_proc else 0
+                if score > TRACK_MATCH_THRESHOLD:
+                    candidates.append((-score, fi, ti, f, nt, score))
+                    if score > best_for_file.get(f, (0, None))[0]:
+                        best_for_file[f] = (score, nt)
 
-            remaining_norm = [t for t in norm_titles
-                              if norm_map[t] not in used_tracks]
-            if not remaining_norm:
-                log += f"  SKIPPED (no tracks left): {f}\n"
+        # ── Ambiguity guard ───────────────────────────────────────────────────
+        # If a file's best match is a name shared by several tracks (e.g. "War"
+        # on disc 1 and disc 2), don't guess — leave it for manual pairing.
+        ambiguous_files = {f for f, (_, nt) in best_for_file.items()
+                           if nt in ambiguous_norms}
+        for f in files:
+            if f in ambiguous_files:
+                log += f"  AMBIGUOUS: {f}  (multiple tracks share this name — pair it manually)\n"
+
+        used_files, used_tracks = set(), set()
+        for _, _, _, f, nt, score in sorted(candidates):
+            if f in used_files or nt in used_tracks or f in ambiguous_files \
+                    or nt in ambiguous_norms:
                 continue
+            used_files.add(f)
+            used_tracks.add(nt)
+            track = track_map[norm_map[nt]]
+            temp_matches.append({
+                "old_name": f,
+                "num":      track["num"],
+                "disc":     track.get("disc", 1),
+                "title":    track["name"],
+                "track":    track,          # full track object for featured artists
+                "score":    score,
+            })
 
-            match = process.extractOne(fn_norm, remaining_norm,
-                                       scorer=self._subset_sort_ratio)
-            if match and match[1] > TRACK_MATCH_THRESHOLD:
-                matched_norm   = match[0]
-                original_title = norm_map[matched_norm]
-
-                # ── Ambiguity guard ───────────────────────────────────────────
-                # If this normalized name maps to multiple tracks (e.g. "War"
-                # on disc 1 and disc 2), skip auto-matching and let the user
-                # decide manually in the pairing dialog.
-                if matched_norm in ambiguous_norms:
-                    log += f"  AMBIGUOUS: {f}  (multiple tracks share this name — use manual pairing)\n"
-                    continue
-
-                track = track_map[original_title]
-                used_tracks.add(original_title)
-                temp_matches.append({
-                    "old_name": f,
-                    "num":      track["num"],
-                    "disc":     track.get("disc", 1),
-                    "title":    track["name"],
-                    "track":    track,          # full track object for featured artists
-                    "score":    match[1],
-                })
-            else:
-                log += f"  UNMATCHED: {f}  (see manual pairing dialog)\n"
+        for f in files:
+            if f not in used_files and f not in ambiguous_files:
+                log += f"  UNMATCHED: {f}  (pair it manually)\n"
 
         temp_matches.sort(key=lambda x: (x["disc"], x["num"]))
 
@@ -198,16 +258,18 @@ class BaseEngine:
             else:
                 seen_names[key] = [m]
 
-        needs_disambig = {
+        # Numbered names are already unique per (disc, track).
+        needs_disambig = set() if self.track_number_prefix else {
             id(m)
             for matches in seen_names.values() if len(matches) > 1
             for m in matches
         }
 
         ep_data = []
+        naming = self._naming(tracks)
         for m in temp_matches:
             ext      = os.path.splitext(m["old_name"])[1]
-            base_name = self._track_filename(m["track"], ext)
+            base_name = self._track_filename(m["track"], ext, *naming)
 
             if id(m) in needs_disambig:
                 prefix   = (f"Disc {m['disc']} - " if m["disc"] > 1

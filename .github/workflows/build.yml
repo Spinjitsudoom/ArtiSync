@@ -1,5 +1,12 @@
 name: Build
 
+# Builds every download for the ArtiSync app:
+#   Windows  ArtiSync-Setup.exe, ArtiSync-Portable.zip
+#   macOS    ArtiSync-macOS.dmg, ArtiSync-macOS-app.zip   (Apple Silicon)
+#   Linux    ArtiSync.AppImage, ArtiSync.flatpak
+# Manual runs (Actions → Build → Run workflow) only upload them as workflow
+# artifacts. Pushing a tag like v3.0.0 also publishes a GitHub Release.
+
 on:
   push:
     tags:
@@ -9,83 +16,139 @@ on:
 permissions:
   contents: write
 
+env:
+  PYTHON_VERSION: '3.12'
+
 jobs:
-  # ── Windows ──────────────────────────────────────────────────────────────────
-  build-windows:
+  windows:
     name: Windows
     runs-on: windows-latest
-
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install Qt 6
-        uses: jurplel/install-qt-action@v3
+      - uses: actions/setup-python@v5
         with:
-          version: '6.7.3'
-          host: windows
-          target: desktop
-          arch: win64_msvc2019_64
-          cache: true
-
-      - name: Configure
-        working-directory: "c++ source code"
-        run: cmake -B build -DCMAKE_BUILD_TYPE=Release
-
-      - name: Build
-        working-directory: "c++ source code"
-        run: cmake --build build --config Release --parallel
-
-      - name: Deploy Qt (bundle DLLs)
-        working-directory: "c++ source code"
-        run: windeployqt --release build\Release\ArtiSync.exe
-
-      - name: Build installer (Inno Setup)
-        working-directory: "c++ source code"
-        run: '& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" ArtiSync.iss'
-
-      - name: Package portable zip
-        working-directory: "c++ source code"
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install dependencies
+        run: python -m pip install -r packaging/requirements.txt pyinstaller pillow
+      - name: Bundle the app
+        run: python packaging/build.py
+      - name: Portable zip
         shell: pwsh
-        run: Compress-Archive -Path build\Release\* -DestinationPath ArtiSync-Portable.zip
-
-      - name: Upload installer
-        uses: actions/upload-artifact@v4
+        run: |
+          New-Item -ItemType Directory -Force packaging/out | Out-Null
+          Compress-Archive -Path packaging/dist/ArtiSync -DestinationPath packaging/out/ArtiSync-Portable.zip
+      - name: Installer (Inno Setup)
+        shell: pwsh
+        run: |
+          $iscc = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { choco install innosetup -y --no-progress | Out-Null }
+          $version = python -c "import sys; sys.path.insert(0, 'python source code'); from version import VERSION; print(VERSION)"
+          & $iscc "/DAppVersion=$version" packaging\windows\ArtiSync.iss
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v4
         with:
-          name: ArtiSync-Setup
-          path: "c++ source code/ArtiSync-Setup.exe"
+          name: windows
+          path: |
+            packaging/out/ArtiSync-Setup.exe
+            packaging/out/ArtiSync-Portable.zip
 
-      - name: Upload portable
-        uses: actions/upload-artifact@v4
+  macos:
+    name: macOS
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
-          name: ArtiSync-Portable
-          path: "c++ source code/ArtiSync-Portable.zip"
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install dependencies
+        run: python -m pip install -r packaging/requirements.txt pyinstaller pillow
+      - name: Bundle, app zip and DMG
+        run: PYTHON=python OUT_DIR=packaging/out bash packaging/macos/build_dmg.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos
+          path: |
+            packaging/out/ArtiSync-macOS.dmg
+            packaging/out/ArtiSync-macOS-app.zip
 
-  # ── Attach to GitHub Release (tag pushes only) ────────────────────────────────
+  appimage:
+    name: Linux AppImage
+    # The AppImage runs on distros with this glibc or newer, so build on an
+    # older Ubuntu.
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: System libraries Qt needs (bundled into the AppImage)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libegl1 libgl1 libfontconfig1 libdbus-1-3 libxkbcommon-x11-0 \
+            libxcb-cursor0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 \
+            libxcb-randr0 libxcb-render-util0 libxcb-shape0 libxcb-xinerama0
+      - name: Install dependencies
+        run: python -m pip install -r packaging/requirements.txt pyinstaller pillow
+      - name: appimagetool
+        run: |
+          curl -fsSL -o /usr/local/bin/appimagetool \
+            https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x /usr/local/bin/appimagetool
+      - name: Build AppImage
+        env:
+          APPIMAGE_EXTRACT_AND_RUN: '1'
+        run: |
+          PYTHON=python OUT_DIR=packaging/out bash packaging/linux/build_appimage.sh
+          mv packaging/out/ArtiSync-*-x86_64.AppImage packaging/out/ArtiSync.AppImage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: appimage
+          path: packaging/out/ArtiSync.AppImage
+
+  flatpak:
+    name: Linux Flatpak
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-25.08
+      options: --privileged
+    steps:
+      - uses: actions/checkout@v4
+      - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: ArtiSync.flatpak
+          manifest-path: packaging/flatpak/com.artisync.ArtiSync.yml
+          cache-key: flatpak-builder-${{ github.sha }}
+          upload-artifact: false
+      - uses: actions/upload-artifact@v4
+        with:
+          name: flatpak
+          path: ArtiSync.flatpak
+
   release:
-    name: Publish to Release
-    needs: [build-windows]
+    name: Publish GitHub Release
+    needs: [windows, macos, appimage, flatpak]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
-
     steps:
       - uses: actions/checkout@v4
-
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
+      - name: Tag must match version.py
+        run: |
+          version=$(python3 -c "import sys; sys.path.insert(0, 'python source code'); from version import VERSION; print(VERSION)")
+          if [ "v$version" != "${{ github.ref_name }}" ]; then
+            echo "Tag ${{ github.ref_name }} doesn't match version.py ($version)"; exit 1
+          fi
+      - uses: actions/download-artifact@v4
         with:
           path: artifacts/
           merge-multiple: true
-
-      - name: Upload assets to GitHub Release
+      - name: Create or update the release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "${{ github.ref_name }}" \
-            --title "ArtiSync ${{ github.ref_name }}" \
-            --generate-notes \
-            "artifacts/ArtiSync-Setup.exe" \
-            "artifacts/ArtiSync-Portable.zip" \
-          || gh release upload "${{ github.ref_name }}" \
-            "artifacts/ArtiSync-Setup.exe" \
-            "artifacts/ArtiSync-Portable.zip" \
-            --clobber
+          files=(artifacts/ArtiSync-Setup.exe artifacts/ArtiSync-Portable.zip
+                 artifacts/ArtiSync-macOS.dmg artifacts/ArtiSync-macOS-app.zip
+                 artifacts/ArtiSync.AppImage artifacts/ArtiSync.flatpak)
+          gh release create "${{ github.ref_name }}" --title "ArtiSync ${{ github.ref_name }}" \
+            --generate-notes "${files[@]}" \
+          || gh release upload "${{ github.ref_name }}" "${files[@]}" --clobber
